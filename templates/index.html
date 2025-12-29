@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-t" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Pencatatan Keuangan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+  
+</head>
+
+<body>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i id="toast-icon" class="bi me-2"></i>
+        <strong class="me-auto" id="toast-title"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+      </div>
+      <div class="toast-body" id="toast-body"></div>
+    </div>
+  </div>
+
+  <div id="login-page" class="page">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+              <div class="text-center mb-4">
+                <i class="bi bi-shop-window" style="font-size: 3rem; color: #0d6efd"></i>
+                <h3 class="card-title mt-2">Selamat Datang</h3>
+                <p class="text-muted">Masuk untuk melanjutkan</p>
+              </div>
+              <form id="login-form">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="username" required />
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="password" required />
+                    <button class="btn btn-outline-secondary" type="button"
+                      onclick="togglePasswordVisibility(this, 'password')">
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="d-grid mt-4">
+                  <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%include 'components/owner_pages.html' %}
+  {%include 'components/lapak_pages.html' %}
+  {%include 'components/supplier_pages.html' %}
+  {%include 'components/superowner_pages.html' %}
+
+  <div id="rekap-footer" class="sticky-footer footer-hidden" style="display: none">
+    <div id="footer-handle" class="text-center p-1 bg-light border-bottom" style="cursor: pointer;">
+      <i id="footer-toggle-icon" class="bi bi-chevron-down" style="font-size: 1.2rem;"></i>
+    </div>
+
+    <div id="footer-content">
+      <div class="p-3 border-bottom">
+        <h6><i class="bi bi-cash-stack"></i> Input Hasil Penjualan</h6>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text" style="width: 60px">QRIS</span>
+          <span class="input-group-text">Rp</span>
+          <input type="text" class="form-control rekap-input" id="rekap-qris" placeholder="0" inputmode="numeric" />
+        </div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text" style="width: 60px">BCA</span>
+          <span class="input-group-text">Rp</span>
+          <input type="text" class="form-control rekap-input" id="rekap-bca" placeholder="0" inputmode="numeric" />
+        </div>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text" style="width: 60px">CASH</span>
+          <span class="input-group-text">Rp</span>
+          <input type="text" class="form-control rekap-input" id="rekap-cash" placeholder="0" inputmode="numeric" />
+        </div>
+      </div>
+
+      <div class="p-3 bg-light">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex justify-content-between">
+              <span>Total (dari Tabel):</span>
+              <strong id="total-sistem">Rp NaN</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Total (dari Input):</span>
+              <strong id="total-manual">Rp 0</strong>
+            </div>
+            <div id="reconciliation-warning" class="alert alert-danger p-2 text-center small mt-2"
+              style="display: none">
+              <i class="bi bi-exclamation-triangle-fill"></i> Total tidak sesuai! Cek kembali.
+            </div>
+          </div>
+          <div class="col-md-4 d-grid">
+            <button id="kirim-laporan-btn" class="btn btn-primary btn-lg">
+              <i class="bi bi-send-fill"></i> Kirim Laporan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%include 'components/modals.html' %}
+
+  <nav id="superowner-bottom-nav" class="bottom-nav justify-content-around" style="display: none;">
+    <button class="bottom-nav-link active" onclick="showPageAndNav('superowner-dashboard', this)">
+      <i class="bi bi-grid-fill"></i>
+      <span>Dashboard</span>
+    </button>
+    <button class="bottom-nav-link" onclick="showPageAndNav('superowner-manage-owners-page', this)">
+      <i class="bi bi-person-plus-fill"></i>
+      <span>Owners</span>
+    </button>
+    <button class="bottom-nav-link" onclick="showPageAndNav('superowner-manage-reports-page', this)">
+      <i class="bi bi-file-earmark-medical-fill"></i>
+      <span>Laporan</span>
+    </button>
+    <button class="bottom-nav-link" onclick="showPageAndNav('superowner-transactions-page', this)">
+      <i class="bi bi-arrow-down-up"></i>
+      <span>Transaksi</span>
+    </button>
+  </nav>
+  <nav id="owner-bottom-nav" class="bottom-nav justify-content-around" style="display: none;">
+    <button class="bottom-nav-link" id="nav-btn-dashboard" onclick="showPage('owner-dashboard')">
+      <i class="bi bi-grid-fill"></i>
+      <span>Home</span>
+    </button>
+    <button class="bottom-nav-link" id="nav-btn-bayar" onclick="showPage('owner-pembayaran-page')">
+      <i class="bi bi-credit-card-2-front-fill"></i>
+      <span>Pembayaran</span>
+    </button>
+    <button class="bottom-nav-link" id="nav-btn-verif" onclick="showPage('owner-verification-center-page')">
+      <i class="bi bi-shield-check"></i>
+      <span>Verifikasi</span>
+    </button>
+  </nav>
+
+  <nav id="supplier-bottom-nav" class="bottom-nav justify-content-around" style="display: none;">
+
+    <button class="bottom-nav-link active position-relative" onclick="showPageAndNav('supplier-dashboard', this)">
+      <i class="bi bi-house-door-fill"></i>
+      <span>Beranda</span>
+
+      <span id="notification-badge"
+        class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger"
+        style="display: none; font-size: 0.6rem; margin-top: 5px; margin-left: 10px;">
+        0
+      </span>
+    </button>
+
+    <button class="bottom-nav-link" onclick="showPageAndNav('supplier-notification-history-page', this)">
+      <i class="bi bi-archive-fill"></i>
+      <span>Arsip Stok</span>
+    </button>
+    <button class="bottom-nav-link" onclick="showPageAndNav('supplier-history-page', this)">
+      <i class="bi bi-clock-history"></i>
+      <span>Riwayat</span>
+    </button>
+    <button class="bottom-nav-link" onclick="alert('Fitur Info Profil akan segera hadir!')">
+      <i class="bi bi-person-circle"></i>
+      <span>Info</span>
+    </button>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  
+</body>
+
+</html>

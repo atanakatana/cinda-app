@@ -1,0 +1,448 @@
+<div class="modal fade" id="atur-produk-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Atur Produk untuk Laporan Hari Ini</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4 border-end">
+            <h6>Pilih Supplier</h6>
+            <div id="supplier-selection-container" class="list-group"></div>
+          </div>
+          <div class="col-md-8">
+            <div id="product-area-title">
+              <p class="text-muted pt-3">Pilih satu supplier untuk melihat & menambah produk.</p>
+            </div>
+
+            <div id="add-product-form-container" class="p-3 mb-3 border rounded bg-light" style="display: none;">
+              <h6>Tambah Produk Baru</h6>
+              <form id="add-product-to-supplier-form">
+                <div class="row g-2">
+                  <div class="col-md-4"> <input type="text" id="new-product-name-input" class="form-control"
+                      placeholder="Nama produk..." required>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="number" id="new-product-buy-price-input" class="form-control" placeholder="Beli (Rp)"
+                      required>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="number" id="new-product-price-input" class="form-control" placeholder="Jual (Rp)"
+                      required>
+                  </div>
+                  <div class="col-md-2 d-grid">
+                    <button class="btn btn-primary" type="submit">Simpan</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div id="product-selection-area" style="display: none;">
+              <h6>Pilih Produk & Isi Stok Awal</h6>
+
+              <div class="mb-3">
+                <input type="text" id="modal-product-search-input" class="form-control"
+                  placeholder="Cari produk di sini...">
+              </div>
+
+              <div id="product-selection-container" style="max-height: 300px; overflow-y: auto;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="generateReportTables()">Terapkan ke Tabel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit-admin-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="admin-modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="edit-admin-form">
+        <input type="hidden" id="edit-admin-id" />
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nama Lengkap</label><input type="text" class="form-control" id="edit-admin-nama"
+              required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Username</label><input type="text" class="form-control" id="edit-admin-username"
+              required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label><input type="email" class="form-control" id="edit-admin-email"
+              required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nomor Kontak</label><input type="tel" class="form-control" id="edit-admin-kontak"
+              required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="edit-admin-password" /><button
+                class="btn btn-outline-secondary" type="button"
+                onclick="togglePasswordVisibility(this, 'edit-admin-password')">
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+            <small class="form-text text-muted"></small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Konfirmasi Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="edit-admin-password-confirm" /><button
+                class="btn btn-outline-secondary" type="button"
+                onclick="togglePasswordVisibility(this, 'edit-admin-password-confirm')">
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Batal</button><button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="edit-lapak-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lapak-modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="edit-lapak-form">
+        <input type="hidden" id="edit-lapak-id" />
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Lokasi Lapak</label><input type="text" class="form-control" id="edit-lapak-lokasi"
+              required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Penanggung Jawab (Wajib)</label><select class="form-select" id="lapak-pj-select"
+              required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Anggota (Opsional)</label>
+            <div id="lapak-anggota-selection"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Batal</button><button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="edit-supplier-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supplier-modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="edit-supplier-form">
+        <input type="hidden" id="edit-supplier-id" />
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nama Supplier</label><input type="text" id="edit-supplier-nama"
+                class="form-control" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Username</label><input type="text" id="edit-supplier-username"
+                class="form-control" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Kontak</label><input type="tel" id="edit-supplier-kontak" class="form-control"
+                required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nomor Register</label><input type="text" id="edit-supplier-register"
+                class="form-control" readonly />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Metode Pembayaran</label><select id="edit-supplier-metode" class="form-select"
+                required>
+                <option value="" selected disabled>
+                  -- Pilih Jenis --
+                </option>
+                <option value="DANA">DANA</option>
+                <option value="BCA">BCA</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nomor Rekening / DANA</label><input type="text" id="edit-supplier-rekening"
+                class="form-control" required />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Alamat</label><textarea class="form-control" id="edit-supplier-alamat"
+                rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <input type="password" id="edit-supplier-password" class="form-control" /><button
+                  class="btn btn-outline-secondary" type="button"
+                  onclick="togglePasswordVisibility(this, 'edit-supplier-password')">
+                  <i class="bi bi-eye-slash"></i>
+                </button>
+              </div>
+              <small class="form-text text-muted"></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Konfirmasi Password</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="edit-supplier-password-confirm" /><button
+                  class="btn btn-outline-secondary" type="button"
+                  onclick="togglePasswordVisibility(this, 'edit-supplier-password-confirm')">
+                  <i class="bi bi-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Batal</button><button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="supplier-bill-detail-modal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Rincian Tagihan Belum Dibayar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="supplier-bill-loading" class="text-center p-4">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 small text-muted">Mengambil data tagihan...</p>
+        </div>
+
+        <div id="supplier-bill-content" style="display: none;">
+          <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th class="ps-3">Tanggal & Lapak</th>
+                <th class="text-end pe-3">Nominal</th>
+              </tr>
+            </thead>
+            <tbody id="supplier-bill-table-body">
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td class="text-end fw-bold">Total</td>
+                <td class="text-end fw-bold pe-3" id="modal-total-bill">Rp 0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div id="supplier-bill-empty" class="text-center p-5" style="display: none;">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          <p class="mt-3">Tidak ada tagihan tertunggak.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="payment-confirmation-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi & Bayar Tagihan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="payment-confirmation-form">
+        <input type="hidden" id="payment-supplier-id" /><input type="hidden" id="payment-supplier-amount" />
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-5 border-end">
+              <label class="small text-muted">Kepada Supplier:</label>
+              <h5 id="payment-supplier-name-confirm" class="mb-3"></h5>
+
+              <label class="small text-muted">Total Tagihan Saat Ini:</label>
+              <h3 class="text-success fw-bold" id="payment-amount-confirm"></h3>
+
+              <div class="alert alert-warning mt-3 small">
+                <i class="bi bi-bank"></i> Rekening: <strong id="payment-method-info"></strong>
+              </div>
+            </div>
+
+            <div class="col-md-7">
+              <h6 class="border-bottom pb-2"><i class="bi bi-calendar3"></i> Akumulasi Tagihan Harian</h6>
+              <div id="payment-modal-breakdown" class="pe-2" style="max-height: 250px; overflow-y: auto;">
+                <div class="text-center text-muted small mt-4">Memuat rincian...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-success">Konfirmasi Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="report-detail-modal" tabindex="-1" aria-labelledby="reportDetailModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reportDetailModalLabel">
+          Detail Laporan Harian
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="invoice-content" class="invoice-box"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Tutup
+        </button>
+        <button type="button" class="btn btn-primary" onclick="downloadReportAsPDF()">
+          <i class="bi bi-download"></i> Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="superowner-withdraw-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Penarikan Saldo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="withdraw-owner-id" />
+        <p>Anda akan menandai saldo dari owner berikut sebagai lunas (di-nol-kan):</p>
+        <h5><strong id="withdraw-owner-name-confirm" class="text-primary">Nama Owner</strong></h5>
+        <div class="alert alert-info">
+          Total Saldo: <strong id="withdraw-amount-confirm">Rp 0</strong>
+        </div>
+        <p class="text-muted small">Tindakan ini akan mencatat transaksi penarikan dan me-reset saldo owner ini
+          menjadi nol. Lanjutkan?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-success" onclick="handleSuperownerWithdrawForOwner()">
+          Konfirmasi Penarikan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="superowner-edit-owner-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="superowner-owner-modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="superowner-edit-owner-form">
+        <input type="hidden" id="superowner-edit-owner-id" />
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Nama Lengkap</label><input type="text" class="form-control"
+              id="superowner-edit-owner-nama" required /></div>
+          <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control"
+              id="superowner-edit-owner-username" required /></div>
+          <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control"
+              id="superowner-edit-owner-email" required /></div>
+          <div class="mb-3"><label class="form-label">Nomor Kontak</label><input type="tel" class="form-control"
+              id="superowner-edit-owner-kontak" required /></div>
+          <div class="mb-3"><label class="form-label">Password</label>
+            <div class="input-group"><input type="password" class="form-control"
+                id="superowner-edit-owner-password" /><button class="btn btn-outline-secondary" type="button"
+                onclick="togglePasswordVisibility(this, 'superowner-edit-owner-password')"><i
+                  class="bi bi-eye-slash"></i></button></div><small class="form-text text-muted"></small>
+          </div>
+          <div class="mb-3"><label class="form-label">Konfirmasi Password</label>
+            <div class="input-group"><input type="password" class="form-control"
+                id="superowner-edit-owner-password-confirm" /><button class="btn btn-outline-secondary" type="button"
+                onclick="togglePasswordVisibility(this, 'superowner-edit-owner-password-confirm')"><i
+                  class="bi bi-eye-slash"></i></button></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="bill-detail-modal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Rincian Tagihan Berjalan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6 id="detail-supplier-name" class="text-primary mb-3"></h6>
+        <div id="bill-breakdown-container">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="btn-pay-from-detail">Bayar Sekarang</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="edit-product-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-product-id">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nama Produk</label>
+            <input type="text" id="edit-product-name" class="form-control" required>
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Harga Beli (Modal)</label>
+              <input type="number" id="edit-product-buy-price" class="form-control" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Harga Jual</label>
+              <input type="number" id="edit-product-sell-price" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

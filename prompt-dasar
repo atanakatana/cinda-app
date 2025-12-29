@@ -1,0 +1,21 @@
+aku sedang membangun website manajemen pencatatan penjualan berbasis web menggunakan flask. user dari aplikasi ini terdiri dari superowner, owner, supplier dan admin. admin membuat laporan, supplier menerima laporan stok produk miliknya, owner menerima laporan dari admin miliknya, superowner menerima laporan dari owner miliknya. tujuan dari aplikasi ini adalah untuk mempermudah pencatatan dan dapat diketahui oleh pihak-pihak terkait apalagi superowner, bisa dibilang setiap owner ini sebagai franchise mungkin.
+
+aku ingin melakukan perubahan pengaturan harga barang dari yang sebelumnya default sekarang menjadi harus dimasukkan untuk harga jual, harga beli untuk sekarang tetap.
+
+aku ingin melakukan perubahan tambilan UI/UX menjadi lebih modern, bisa terapkan desain superowner, owner, supplier dan lapak ke dalam index.html dan app.py yang sudah ada?
+
+aku ingin menerapkan perubahan tampilan superowner, interfacenya akan seperti pada lampiran yang aku sematkan, bisa lakukan? alasan dirubahnya interface karena aplikasi akan banyak digunakan pada perangkat handphone
+
+Pada aplikasi ini aku membuat index.html yang menampung semua kode front-end hingga javascript. Lalu aku juga membuat app.py untuk menampung semua logika back-end termasuk database. Alasannya karena aku baru memulai web development dan masih belajar. Namun sekarang aku ingin merefactor kodeku menjadi lebih baik agar saat digunakan tidak lelet. Bagaimana caranya? Bagaimana struktur umum kode jika menggunakan flask? Apakah ini mungkin dilakukan? Aku masih awam terhadap hal ini tapi aku ingin ini berhasil agar klienku dapat menggunakan aplikasi yang berfungsi dengan baik.
+
+bagaimana memperbaiki navbar yang masih menyala di halaman lain padahal posisi sudah berpindah di dashboard? ini terjadi saat menekan panah kembali pada menu selain dashboard
+
+rider gojek d 2830 vey
+
+aku perlu beberapa perubahan:
+* bagaimana jika card "pusat verifikasi" diubah menjadi "periksa laporan masuk"
+* menu verifikasi pada navbar dipindah menjadi paling kanan
+* pada halaman verifikasi untuk diteruskan ke superowner tambahkan keterangan untuk jika ada laporan yang perlu dikonfirmasi, laporan yang sudah dikonfirmasi tapi belum dilakukan pembayaran laporan ke supplier, dan laporan yang sudah siap kirim agar semakin memperjelas alur dan status pelaporan
+
+bagaimana jika card "pusat verifikasi" diubah menjadi "periksa laporan masuk"? lalu menu verifikasi pada navbar mungkin dipindah menjadi paling kanan lalu mungkin diperlukan pembaruan tampilan halaman verifikasi laporan agar menampilkan laporan dengan status perlu dikonfirmasi, perlu dilakukan pelunasan ke supplier, dan atau siap untuk dikirim bagaimana menurutmu?
+
