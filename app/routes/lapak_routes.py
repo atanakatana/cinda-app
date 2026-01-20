@@ -64,7 +64,9 @@ def submit_catatan_harian():
                     new_product = Product(
                         nama_produk=prod_data['nama_produk'],
                         supplier_id=prod_data.get('supplier_id') if str(prod_data.get('supplier_id')).lower() != 'manual' else None,
-                        harga_beli=HARGA_BELI_DEFAULT, harga_jual=HARGA_JUAL_DEFAULT, is_manual=True
+                        harga_beli=float(prod_data.get('harga_beli') or 0),
+                        harga_jual=float(prod_data.get('harga_jual') or 0), 
+                        is_manual=True
                     )
                     new_product.lapaks.append(lapak)
                     db.session.add(new_product)

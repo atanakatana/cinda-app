@@ -1,8 +1,8 @@
 import os
 
 class Config:
-	#menggunakan path absolut agar database tidak nyasar
+	# menggunakan path absolut agar database tidak nyasar
 	BASEDIR = os.path.abspath(os.path.dirname(__file__))
-	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASEDIR, 'app.db')
+	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASEDIR, 'penjualan.db')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
-	SECRET_KEY = 'ini-kunci-rahasia'
+	SECRET_KEY = 'tomato'
