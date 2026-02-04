@@ -1740,6 +1740,15 @@ async function handleAddNewProduct(e) {
 
     if (result.success) {
       // 4. Update State Lokal (Agar langsung muncul tanpa refresh)
+    const newProductEntry = {
+          id: result.product.id,
+          name: result.product.name,
+          // Pastikan supplier_id ada (ambil dari result atau variable lokal)
+          supplier_id: result.product.supplier_id || supplierId, 
+          harga_beli: parseFloat(result.product.harga_beli),
+          harga_jual: parseFloat(result.product.harga_jual)
+      };
+
       AppState.masterData.products.push(result.product);
 
       // 5. Reset Form

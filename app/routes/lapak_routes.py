@@ -115,7 +115,16 @@ def add_manual_product():
         if lapak: new_product.lapaks.append(lapak)
         db.session.add(new_product)
         db.session.commit()
-        return jsonify({"success": True, "product": {"id": new_product.id, "name": new_product.nama_produk}}), 201
+        return jsonify({
+          "success": True,
+          "product": {
+            "id": new_product.id,
+            "name": new_product.nama_produk,
+            "supplier_id": new_product.supplier_id,
+            "harga_beli": new_product.harga_beli,
+            "harga_jual": new_product.harga_jual
+          }
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
