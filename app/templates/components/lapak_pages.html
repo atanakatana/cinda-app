@@ -95,19 +95,49 @@
               </div>
             </div>
 
-            <div id="report-summary-container" style="display: none;">
-              <div id="summary-placeholder"></div>
-              <div id="summary-content">
-                <span id="summary-total-terjual"></span>
-                <span id="summary-total-pendapatan"></span>
-                <span id="summary-total-biaya"></span>
-                <span id="summary-total-keuntungan"></span>
+            <div id="report-summary-container" style="display: none;" class="mt-4">
+  
+              <div class="d-flex align-items-center mb-2">
+                <h6 class="fw-bold text-secondary mb-0 text-uppercase small ls-1">Ringkasan Sementara</h6>
+                <div class="ms-auto badge bg-light text-muted border">Realtime</div>
               </div>
+
+              <div class="card border-0 shadow-sm bg-white overflow-hidden" style="border-radius: 12px;">
+                <div class="card-body p-0">
+                  <div class="row g-0">
+                    
+                    <div class="col-6 border-end border-bottom p-3 text-center bg-light bg-opacity-10">
+                      <small class="d-block text-muted mb-1" style="font-size: 0.7rem;">TERJUAL</small>
+                      <span id="summary-total-terjual" class="fw-bold text-dark fs-5">0 Pcs</span>
+                    </div>
+
+                    <div class="col-6 border-bottom p-3 text-center bg-success bg-opacity-10">
+                      <small class="d-block text-success mb-1" style="font-size: 0.7rem;">PENDAPATAN</small>
+                      <span id="summary-total-pendapatan" class="fw-bold text-success fs-5">Rp 0</span>
+                    </div>
+
+                    <div class="col-6 border-end p-3 text-center bg-light bg-opacity-10">
+                      <small class="d-block text-muted mb-1" style="font-size: 0.7rem;">EST. BIAYA</small>
+                      <span id="summary-total-biaya" class="fw-bold text-secondary fs-6">Rp 0</span>
+                    </div>
+
+                    <div class="col-6 p-3 text-center bg-primary bg-opacity-10">
+                      <small class="d-block text-primary mb-1" style="font-size: 0.7rem;">EST. PROFIT</small>
+                      <span id="summary-total-keuntungan" class="fw-bold text-primary fs-6">Rp 0</span>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              
+              <p class="text-center text-muted mt-2 small fst-italic" style="font-size: 0.75rem;">
+                *Angka di atas dihitung otomatis berdasarkan stok awal & akhir.
+              </p>
             </div>
           </div>
         </div>
 
-        <div class="card step-card">
+        <div class="card step-card" id="rekap-manual-card">
           <div class="step-header">
             <h5 class="mb-0 text-info fw-bold"><i class="bi bi-send-check-fill me-2"></i>Langkah 3: Ringkasan & Kirim
             </h5>

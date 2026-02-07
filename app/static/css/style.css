@@ -1,8 +1,24 @@
+:root {
+  --color-primary: #0d6efd;
+  --color-success: #198754;
+  --color-warning: #ffc107;
+  --color-gray-light: #f8f9fa;
+  --color-gray-border: #dee2e6;
+  --color-gray-text: #6c757d;
+  --color-text: #212529;
+  --color-bg: #ffffff;
+  --spacing-unit: 1rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 12px;
+  --z-toast: 1150;
+  --z-sticky-nav: 1050;
+  --z-dropdown: 1020;
+}
+
 body {
-  background-color: #f8f9fa;
-  color: #212529;
-  padding-bottom: 150px;
-  /* Ruang untuk footer */
+  background-color: var(--color-gray-light);
+  color: var(--color-text);
+  padding-bottom: 80px;
 }
 
 .page {
@@ -27,7 +43,7 @@ body {
 }
 
 .toast-container {
-  z-index: 1150;
+  z-index: var(--z-toast);
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -45,17 +61,19 @@ input[type="number"] {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: white;
+  background-color: var(--color-bg);
   z-index: 1000;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
-  /* Posisi awal (terbuka) */
 }
 
-.footer-hidden {
-  /* Geser ke bawah sebesar 100% dikurangi tinggi handle (misal 45px) */
+.sticky-footer.footer-hidden {
   transform: translateY(calc(100% - 35px));
+}
+
+.sticky-footer.footer-hidden #footer-content {
+  visibility: hidden;
 }
 
 .btn-action {
@@ -68,7 +86,8 @@ input[type="number"] {
   padding: 0;
 }
 
-/* Gaya Tabel Baru */
+/* Tables */
+
 .table-responsive {
   max-height: 65vh;
 }
@@ -86,10 +105,11 @@ input[type="number"] {
 
 .product-supplier-info small {
   font-size: 0.8em;
-  color: #6c757d;
+  color: var(--color-gray-text);
 }
 
-/* Invoice Styles */
+/* Invoice */
+
 .invoice-box {
   max-width: 800px;
   margin: auto;
@@ -148,18 +168,17 @@ input[type="number"] {
   color: #6f42c1;
 }
 
-/* Tambahkan kode ini di dalam tag <style> */
-.footer-hidden #footer-content {
-  visibility: hidden;
-}
+/* Cards - Common hover effects */
 
-/* (Letakkan ini di dalam tag <style>) */
-
-.report-card {
+.report-card,
+.kpi-card,
+.clickable-card {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  border-left: 5px solid #0d6efd;
-  /* Aksen warna biru */
+}
+
+.report-card {
+  border-left: 5px solid var(--color-primary);
 }
 
 .report-card:hover {
@@ -167,71 +186,24 @@ input[type="number"] {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* (Letakkan ini di dalam tag <style>) */
-
-.kpi-card {
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
 .kpi-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* --- CSS KHUSUS SUPEROWNER MOBILE --- */
-
-/* Spacer agar konten tidak tertutup navigasi bawah */
-#superowner-pages {
-  padding-bottom: 80px;
+.clickable-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Navigasi Bawah Tetap */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #ffffff;
-  border-top: 1px solid #dee2e6;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 1050;
-  /* Lebih tinggi dari konten biasa */
-  padding: 0.5rem 0;
-  display: none;
-  /* Default hidden, dimunculkan via JS */
+.clickable-card:active {
+  transform: scale(0.98);
 }
 
-.bottom-nav-link {
-  color: #6c757d;
-  font-size: 0.75rem;
-  text-decoration: none;
-  background: none;
-  border: none;
-  flex: 1;
-  /* Agar lebar rata */
-}
-
-.bottom-nav-link:hover {
-  color: #0d6efd;
-}
-
-.bottom-nav-link.active {
-  color: #0d6efd;
-  font-weight: 500;
-}
-
-.bottom-nav-link i {
-  font-size: 1.5rem;
-  display: block;
-  margin-bottom: 2px;
-}
-
-/* Kartu KPI Simple (2x2) */
 .kpi-card-simple {
-  background-color: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 0.75rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-gray-border);
+  border-radius: var(--radius-sm);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: transform 0.2s;
 }
@@ -240,47 +212,46 @@ input[type="number"] {
   transform: scale(0.98);
 }
 
-/* --- CSS Tambahan untuk Mobile Owner --- */
+/* Bottom Navigation - Shared across pages */
 
-/* Spacer agar konten paling bawah tidak tertutup nav bar */
-#owner-pages {
+#superowner-pages,
+#owner-pages,
+#supplier-pages {
   padding-bottom: 80px;
 }
 
-/* Navigasi Bawah Tetap (Reused style from Superowner/Alt design) */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #ffffff;
-  border-top: 1px solid #dee2e6;
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-gray-border);
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 1050;
+  z-index: var(--z-sticky-nav);
   padding: 0.5rem 0;
   display: none;
-  /* Default hidden, muncul via JS */
 }
 
 .bottom-nav-link {
-  color: #6c757d;
+  color: var(--color-gray-text);
   font-size: 0.75rem;
   text-decoration: none;
   background: none;
   border: none;
   flex: 1;
-  /* Agar lebar rata */
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: color 0.2s;
 }
 
 .bottom-nav-link:hover {
-  color: #0d6efd;
+  color: var(--color-primary);
 }
 
 .bottom-nav-link.active {
-  color: #0d6efd;
+  color: var(--color-primary);
   font-weight: 500;
 }
 
@@ -290,77 +261,65 @@ input[type="number"] {
   margin-bottom: 2px;
 }
 
-/* List Group Item Custom Action (Panah di kanan) */
 .list-group-item-action {
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-/* --- CSS KHUSUS SUPPLIER MOBILE --- */
+/* Notifications */
 
-/* Spacer agar konten tidak tertutup navigasi bawah */
-#supplier-pages {
-  padding-bottom: 80px;
-}
-
-/* Container Notifikasi agar bisa di-scroll jika panjang */
 .notification-list-scroll {
   max-height: calc(100vh - 250px);
-  /* Menyesuaikan tinggi layar */
   overflow-y: auto;
 }
 
-/* Style tambahan untuk item notifikasi */
 .list-group-item.notification-new {
   background-color: #fff3cd;
-  /* Warna kuning warning bootstrap */
-  border-left: 5px solid #ffc107;
+  border-left: 5px solid var(--color-warning);
 }
 
-/* --- CSS KHUSUS TAMPILAN BARU LAPAK (MOBILE WIZARD) --- */
+/* Progress & Wizard */
+
 .progress-container {
   position: -webkit-sticky;
-  /* Untuk dukungan Safari */
   position: sticky;
   top: 0;
-  background-color: #f8f9fa;
+  background-color: var(--color-gray-light);
   padding: 1rem 0;
-  z-index: 1020;
-  /* Sedikit di bawah navbar/toast */
-  border-bottom: 1px solid #dee2e6;
+  z-index: var(--z-dropdown);
+  border-bottom: 1px solid var(--color-gray-border);
   margin-bottom: 1.5rem;
 }
 
-/* Pastikan card langkah terlihat rapi */
 .step-card {
   border: none;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  overflow: hidden;
 }
 
 .step-header {
-  background-color: #fff;
-  border-bottom: 1px solid rgba(0, 0, 0, .125);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
   padding: 1rem 1.25rem;
 }
 
-/* --- CSS KHUSUS HISTORY LAPORAN --- */
+/* History Reports */
+
 .history-card {
-  border: 1px solid #dee2e6;
-  border-left: 5px solid #6c757d;
-  /* Default abu-abu */
+  border: 1px solid var(--color-gray-border);
+  border-left: 5px solid var(--color-gray-text);
   transition: all 0.2s ease-in-out;
-  background-color: white;
+  background-color: var(--color-bg);
 }
 
 .history-card.confirmed {
-  border-left-color: #198754;
-  /* Hijau untuk terkonfirmasi */
+  border-left-color: var(--color-success);
 }
 
 .history-card.pending {
-  border-left-color: #ffc107;
-  /* Kuning untuk pending */
+  border-left-color: var(--color-warning);
 }
 
 .history-card:hover {
@@ -377,7 +336,7 @@ input[type="number"] {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background-color: #f8f9fa;
+  background-color: var(--color-gray-light);
 }
 
 .history-detail-table td {
@@ -393,26 +352,12 @@ input[type="number"] {
   border-radius: 4px;
 }
 
-/* Tambahkan ini di bagian <style> */
-.clickable-card {
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+/* Report Cards */
 
-.clickable-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-}
-
-.clickable-card:active {
-  transform: scale(0.98);
-}
-
-/* --- CSS KHUSUS CARD LAPORAN OWNER (MOBILE FRIENDLY) --- */
 .report-mobile-card {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-gray-border);
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -424,15 +369,12 @@ input[type="number"] {
   transform: scale(0.98);
 }
 
-/* Garis warna di kiri sebagai indikator status */
 .report-mobile-card.status-pending {
-  border-left: 6px solid #ffc107;
-  /* Kuning */
+  border-left: 6px solid var(--color-warning);
 }
 
 .report-mobile-card.status-confirmed {
-  border-left: 6px solid #198754;
-  /* Hijau */
+  border-left: 6px solid var(--color-success);
 }
 
 .report-card-header {
@@ -449,7 +391,7 @@ input[type="number"] {
 
 .report-card-footer {
   padding: 10px 16px;
-  background-color: #f8f9fa;
+  background-color: var(--color-gray-light);
   display: flex;
   gap: 10px;
 }
@@ -457,12 +399,12 @@ input[type="number"] {
 .report-amount {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--color-text);
 }
 
 .report-profit {
   font-size: 0.85rem;
-  color: #198754;
+  color: var(--color-success);
   font-weight: 600;
   background-color: #d1e7dd;
   padding: 2px 8px;
@@ -470,38 +412,29 @@ input[type="number"] {
   display: inline-block;
 }
 
-/* Styling untuk Card Supplier agar lebih clean di HP */
-.step-card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-    overflow: hidden;
-}
+/* Sticky Summary Footer */
 
-/* Sticky Footer untuk Total Laporan */
 .sticky-summary-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 12px 16px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-    z-index: 1050;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #eee;
-    animation: slideUp 0.3s ease-out;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  padding: 12px 16px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: var(--z-sticky-nav);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #eee;
+  animation: slideUp 0.3s ease-out;
 }
 
 @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
-/* Biar konten paling bawah tidak ketutup footer */
-body {
-    padding-bottom: 80px; 
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
