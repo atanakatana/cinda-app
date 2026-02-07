@@ -13,7 +13,6 @@ let pendapatanChartInstance = null;
 let biayaChartInstance = null;
 let modals = {};
 let superownerChartInstance = null;
-let stickyFooter = null;
 
 // --- HELPER & CORE FUNCTIONS ---
 // Fungsi helper untuk navigasi bawah Superowner
@@ -1867,26 +1866,38 @@ function generateReportTables() {
     if (!supplierGroup) {
       const newGroup = document.createElement('div');
       newGroup.id = supplierGroupId;
-      newGroup.className = 'mb-3 bg-white rounded shadow-sm border-0';
-
-      const paymentMethod = supplier.metode_pembayaran 
-        ? `<span class="badge bg-info bg-opacity-10 text-info border border-info ms-2">${supplier.metode_pembayaran}</span>` 
-        : '';
+      newGroup.className = 'mb-4 border rounded p-2 bg-white shadow-sm';
+      const paymentMethod = supplier.metode_pembayaran ? `<span class="badge bg-info ms-2">${supplier.metode_pembayaran}</span>` : '';
 
       // PERBAIKAN DI SINI: Header dan Footer disesuaikan menjadi 4 kolom saja
       newGroup.innerHTML = `
-          <div class="p-3 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-shop me-2 text-secondary"></i>${supplier.name}</h6>
+          <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+              <h6 class="mb-0 fw-bold text-primary">${supplier.name}</h6>
               ${paymentMethod}
           </div>
-          <div class="p-0">
+          <div class="table-responsive">
               <table class="table table-borderless align-middle mb-0">
+                  <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="align-middle">Produk</th> 
+                        
+                        <th class="text-center align-middle" style="width: 60px;">Awal</th>
+                        
+                        <th class="text-center align-middle" style="min-width: 130px;">Akhir</th>
+                        
+                        <th style="width: 30px;"></th> 
+                    </tr>
+                </thead>
                   <tbody></tbody>
+                  <tfoot style="border-top: 1px solid #dee2e6;">
+                    <tr class="fw-bold small">
+                      <td class="text-end text-muted">Total:</td>
+                      <td class="text-center supplier-total-awal">0</td>
+                      <td class="text-center supplier-total-akhir">0</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
               </table>
-          </div>
-          <div class="px-3 py-2 bg-light bg-opacity-25 border-top d-flex justify-content-between small text-muted">
-             <span>Total Stok: <span class="supplier-total-awal fw-bold">0</span></span>
-             <span>Sisa: <span class="supplier-total-akhir fw-bold">0</span></span>
           </div>
         `;
       container.appendChild(newGroup);
@@ -1925,54 +1936,51 @@ function generateReportTables() {
 }
 
 function createProductRow(product, supplier) {
-  // Layout Input yang lebih padat & tombol lebih besar untuk jari
+  // PERBAIKAN:
+  // 1. Tambahkan class 'flex-nowrap' di div input-group
+  // 2. Tambahkan style 'min-width' pada input angka agar tidak gepeng
+  // 3. Gunakan 'px-2' pada tombol agar tidak terlalu lebar tapi tetap mudah ditekan
+
   const stokAkhirInput = `
-      <div class="input-group input-group-sm flex-nowrap shadow-sm" style="width: 130px;">
-          <button class="btn btn-outline-secondary btn-minus px-2 border-end-0" type="button" style="background-color: #f8f9fa;">
-            <i class="bi bi-dash-lg"></i>
+      <div class="input-group input-group-sm flex-nowrap" style="max-width: 140px;">
+          <button class="btn btn-outline-secondary btn-minus px-2" type="button">
+            <i class="bi bi-dash"></i>
           </button>
           
           <input type="number" 
-                 class="form-control text-center input-stok stok-akhir fw-bold text-primary border-start-0 border-end-0" 
+                 class="form-control text-center input-stok stok-akhir px-1" 
                  placeholder="0" 
-                 min="0"
-                 style="font-size: 1.1rem; padding: 0;">
+                 min="0" 
+                 style="min-width: 40px;">
                  
-          <button class="btn btn-outline-secondary btn-plus px-2 border-start-0" type="button" style="background-color: #f8f9fa;">
-            <i class="bi bi-plus-lg"></i>
+          <button class="btn btn-outline-secondary btn-plus px-2" type="button">
+            <i class="bi bi-plus"></i>
           </button>
       </div>`;
 
-  // PERUBAHAN:
-  // 1. Stok Awal digabung ke kolom pertama (Small Text)
-  // 2. Text-truncate DIHAPUS (ganti text-wrap)
-  // 3. Hapus kolom Stok Awal yang berdiri sendiri
-  
   return `
       <tr class="product-row border-bottom" data-product-id="${product.id}" data-harga-jual="${product.harga_jual}" data-harga-beli="${product.harga_beli}">
-          <td class="py-3 ps-3 align-middle" style="width: 50%;">
-            <div class="fw-bold text-dark text-wrap mb-1" style="font-size: 0.95rem; line-height: 1.3;">
-                ${product.name}
-            </div>
-            
-            <div class="d-flex align-items-center flex-wrap gap-2">
-               <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                  Awal: <input type="hidden" class="stok-awal" value="${product.stokAwal}"><strong>${product.stokAwal}</strong>
-               </span>
-               
-               <small class="text-muted">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
+          <td class="product-supplier-info py-2 align-middle">
+            <div class="fw-bold text-dark text-truncate" style="max-width: 150px; font-size: 0.9rem;">${product.name}</div>
+            <div class="d-flex align-items-center mt-1">
+               <small class="text-muted me-2">Terjual: <span class="terjual-pcs fw-bold text-primary">0</span></small>
+               <button class="btn btn-xs btn-outline-warning notify-btn py-0 px-1" style="font-size: 0.7rem;"><i class="bi bi-bell"></i> Habis</button>
             </div>
           </td>
           
-          <td class="py-3 align-middle text-end pe-1">
-            <div class="d-flex justify-content-end">
+          <td class="text-center align-middle">
+             <input type="number" class="form-control-plaintext form-control-sm text-center input-stok stok-awal p-0" readonly style="font-weight:bold;">
+          </td>
+          
+          <td class="py-2 align-middle">
+            <div class="d-flex justify-content-center">
               ${stokAkhirInput}
             </div>
           </td>
           
-          <td class="py-3 align-middle text-center pe-2" style="width: 30px;">
-            <button class="btn btn-link text-danger p-1 opacity-50 hover-opacity-100" onclick="removeProductFromTable(this)">
-                <i class="bi bi-x-circle-fill" style="font-size: 1.1rem;"></i>
+          <td class="text-end align-middle">
+            <button class="btn btn-sm btn-link text-danger p-0" onclick="removeProductFromTable(this)">
+                <i class="bi bi-x-lg"></i>
             </button>
           </td>
       </tr>`;
@@ -2202,43 +2210,6 @@ function updateSummarySection() {
   if (elTotalManual) elTotalManual.textContent = formatCurrency(totalManual);
 
   checkReconciliation(totalPendapatan, totalManual);
-
-  // Cek dan ambil referensi sticky footer
-  if (!stickyFooter) {
-    stickyFooter = document.getElementById('custom-sticky-footer');
-  }
-    
-  // Jika belum ada, buat elemen footer-nya
-  if (!stickyFooter) {
-    stickyFooter = document.createElement('div');
-    stickyFooter.id = 'custom-sticky-footer';
-    stickyFooter.className = 'sticky-summary-footer';
-    stickyFooter.innerHTML = `
-      <div>
-        <small class="text-muted d-block" style="font-size: 0.75rem;">Total Sementara</small>
-        <span class="fw-bold text-success fs-5" id="sticky-total-display">Rp 0</span>
-      </div>
-      <button class="btn btn-primary btn-sm px-4 rounded-pill" onclick="document.getElementById('rekap-manual-card').scrollIntoView({behavior: 'smooth'})">
-        Lanjut <i class="bi bi-arrow-right ms-1"></i>
-      </button>
-    `;
-    document.body.appendChild(stickyFooter);
-  }
-  
-  // Update angka total sementara
-  const stickyTotalDisplay = document.getElementById('sticky-total-display');
-  if (stickyTotalDisplay) {
-    stickyTotalDisplay.textContent = formatCurrency(totalPendapatan);
-  }
-  
-  // Tampilkan/Sembunyikan berdasarkan ada produk atau tidak
-  if (stickyFooter) {
-    if (totalPendapatan > 0 || totalTerjual > 0) {
-      stickyFooter.style.display = 'flex';
-    } else {
-      stickyFooter.style.display = 'none';
-    }
-  }
 
   // PERBAIKAN UTAMA: Jangan ubah display summaryContent jadi block
   // Kita hanya sembunyikan placeholder loading
