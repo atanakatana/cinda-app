@@ -1834,9 +1834,12 @@ async function handleEditProductSubmit(e) {
   }
 }
 
+// app/static/js/main.js
+
+// app/static/js/main.js
+
 function generateReportTables() {
   const container = document.getElementById("report-tables-container");
-  const summaryContainer = document.getElementById("report-summary-container");
   const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
 
   if (selectedCheckboxes.length === 0) return showToast("Pilih setidaknya satu produk.", false);
@@ -1847,18 +1850,18 @@ function generateReportTables() {
     const productId = parseInt(cb.value);
     const stokInput = cb.closest('.input-group').querySelector('.modal-stok-awal');
     const stokAwal = parseInt(stokInput.value) || 0;
-    if (stokAwal <= 0) hasInvalidStok = true;
+    if (stokInput.value === "") hasInvalidStok = true; 
     const product = AppState.masterData.products.find(p => p.id === productId);
     if (product) productsToDisplay.push({ ...product, stokAwal });
   });
 
-  if (hasInvalidStok) return showToast("Stok awal harus diisi dan lebih dari 0.", false);
+  if (hasInvalidStok) return showToast("Stok awal wajib diisi.", false);
 
   const initialPrompt = document.getElementById("initial-prompt");
   if (initialPrompt) initialPrompt.style.display = 'none';
-
   document.getElementById("product-search-container").style.display = 'block';
 
+  // --- RENDER GROUP SUPPLIER ---
   productsToDisplay.forEach(productData => {
     const supplier = AppState.masterData.suppliers.find(s => s.id === productData.supplier_id);
     const supplierGroupId = `supplier-group-${supplier.id}`;
@@ -1867,26 +1870,33 @@ function generateReportTables() {
     if (!supplierGroup) {
       const newGroup = document.createElement('div');
       newGroup.id = supplierGroupId;
-      newGroup.className = 'mb-3 bg-white rounded shadow-sm border-0';
-
+      newGroup.className = 'mb-3 bg-white rounded shadow-sm border-0 overflow-hidden';
+      
       const paymentMethod = supplier.metode_pembayaran 
-        ? `<span class="badge bg-info bg-opacity-10 text-info border border-info ms-2">${supplier.metode_pembayaran}</span>` 
+        ? `<span class="badge bg-light text-secondary border me-2">${supplier.metode_pembayaran}</span>` 
         : '';
 
-      // PERBAIKAN DI SINI: Header dan Footer disesuaikan menjadi 4 kolom saja
+      // HEADER BARU: Total Akhir langsung di judul
       newGroup.innerHTML = `
-          <div class="p-3 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-shop me-2 text-secondary"></i>${supplier.name}</h6>
-              ${paymentMethod}
+          <div class="px-3 py-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center overflow-hidden">
+                <i class="bi bi-shop me-2 text-primary"></i>
+                <div>
+                    <h6 class="mb-0 fw-bold text-dark text-truncate">${supplier.name}</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">Total Awal: <span class="supplier-total-awal fw-bold">0</span></small>
+                </div>
+              </div>
+              
+              <div class="text-end ms-2">
+                 <span class="d-block small text-muted text-uppercase" style="font-size: 0.65rem;">Total Akhir</span>
+                 <span class="supplier-total-akhir fw-bold text-primary fs-5" style="line-height: 1;">0</span>
+              </div>
           </div>
-          <div class="p-0">
+          
+          <div class="table-responsive">
               <table class="table table-borderless align-middle mb-0">
-                  <tbody></tbody>
+                  <tbody class="bg-white"></tbody>
               </table>
-          </div>
-          <div class="px-3 py-2 bg-light bg-opacity-25 border-top d-flex justify-content-between small text-muted">
-             <span>Total Stok: <span class="supplier-total-awal fw-bold">0</span></span>
-             <span>Sisa: <span class="supplier-total-akhir fw-bold">0</span></span>
           </div>
         `;
       container.appendChild(newGroup);
@@ -1912,28 +1922,29 @@ function generateReportTables() {
     }
   });
 
+  const reportSummary = document.getElementById("report-summary-container");
+  if (reportSummary) reportSummary.style.display = "block";
+  
   updateSummarySection();
   saveReportStateToLocalStorage();
   modals.aturProduk.hide();
-
-  // UPDATE UI WIZARD
   updateProgressBar(66);
-  showToast("Produk ditambahkan. Silakan isi stok akhir.", true);
-
-  // Auto scroll ke Langkah 2
+  showToast("Produk ditambahkan.", true);
   document.getElementById("report-tables-container").scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// app/static/js/main.js
+
 function createProductRow(product, supplier) {
-  // Layout Input yang lebih padat & tombol lebih besar untuk jari
+  // Input stok akhir (tanpa perubahan logika, hanya layout)
   const stokAkhirInput = `
-      <div class="input-group input-group-sm flex-nowrap shadow-sm" style="width: 130px;">
+      <div class="input-group input-group-sm flex-nowrap shadow-sm input-stok-container" style="width: 125px;">
           <button class="btn btn-outline-secondary btn-minus px-2 border-end-0" type="button" style="background-color: #f8f9fa;">
             <i class="bi bi-dash-lg"></i>
           </button>
           
           <input type="number" 
-                 class="form-control text-center input-stok stok-akhir fw-bold text-primary border-start-0 border-end-0" 
+                 class="form-control text-center input-stok stok-akhir fw-bold text-dark border-start-0 border-end-0" 
                  placeholder="0" 
                  min="0"
                  style="font-size: 1.1rem; padding: 0;">
@@ -1944,36 +1955,32 @@ function createProductRow(product, supplier) {
       </div>`;
 
   // PERUBAHAN:
-  // 1. Stok Awal digabung ke kolom pertama (Small Text)
-  // 2. Text-truncate DIHAPUS (ganti text-wrap)
-  // 3. Hapus kolom Stok Awal yang berdiri sendiri
+  // 1. Tombol Hapus dipindah ke pojok kanan atas (btn-delete-floating)
+  // 2. Kolom tabel dikurangi jadi 2 saja (Nama & Input) agar lebar maksimal
   
   return `
       <tr class="product-row border-bottom" data-product-id="${product.id}" data-harga-jual="${product.harga_jual}" data-harga-beli="${product.harga_beli}">
-          <td class="py-3 ps-3 align-middle" style="width: 50%;">
-            <div class="fw-bold text-dark text-wrap mb-1" style="font-size: 0.95rem; line-height: 1.3;">
+          <td class="py-3 ps-3 align-middle" style="width: 60%;">
+            <button class="btn-delete-floating" onclick="removeProductFromTable(this)" title="Hapus Produk">
+                <i class="bi bi-x-lg"></i>
+            </button>
+          
+            <div class="fw-bold text-dark text-wrap mb-1 pe-2" style="font-size: 0.95rem; line-height: 1.3;">
                 ${product.name}
             </div>
             
-            <div class="d-flex align-items-center flex-wrap gap-2">
-               <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+            <div class="d-flex align-items-center gap-2 mt-1">
+               <span class="badge bg-light text-secondary border fw-normal">
                   Awal: <input type="hidden" class="stok-awal" value="${product.stokAwal}"><strong>${product.stokAwal}</strong>
                </span>
-               
-               <small class="text-muted">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
+               <small class="text-muted" style="font-size: 0.75rem;">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
             </div>
           </td>
           
-          <td class="py-3 align-middle text-end pe-1">
+          <td class="py-3 align-middle text-end pe-3">
             <div class="d-flex justify-content-end">
               ${stokAkhirInput}
             </div>
-          </td>
-          
-          <td class="py-3 align-middle text-center pe-2" style="width: 30px;">
-            <button class="btn btn-link text-danger p-1 opacity-50 hover-opacity-100" onclick="removeProductFromTable(this)">
-                <i class="bi bi-x-circle-fill" style="font-size: 1.1rem;"></i>
-            </button>
           </td>
       </tr>`;
 }
@@ -2581,7 +2588,7 @@ async function handleKirimLaporan() {
   const submitBtn = document.getElementById("kirim-laporan-btn");
   const originalBtnHTML = submitBtn.innerHTML;
   submitBtn.disabled = true;
-  submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Mengirim...`;
+  submitBtn.innerHTML = `<div class="d-flex align-items-center justify-content-center"><span>Mengirim</span><span class="typing-loader"></span></div>`;
 
   try {
     const response = await fetch("/api/submit_catatan_harian", {
