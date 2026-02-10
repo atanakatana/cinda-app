@@ -490,9 +490,9 @@ input[type="number"] {
 
 /* Report Tables Mobile */
 
-.report-tables-container table thead {
+/*.report-tables-container table thead {
   display: none;
-}
+}*/
 
 .report-tables-container table td {
   border-bottom: 1px solid #f0f0f0;
@@ -524,4 +524,53 @@ input[type="number"] {
 /* Pastikan input stok tidak tertutup tombol hapus */
 .input-stok-container {
     margin-right: 1.5rem; /* Beri jarak aman dari tombol hapus */
+}
+
+/* app/static/css/style.css */
+
+/* Paksa sembunyikan header tabel standar karena kita sudah pakai Header Div */
+#report-tables-container table thead {
+    display: none !important;
+}
+
+/* Pastikan tabel tidak punya border ganda yang bikin tebal */
+.table-responsive {
+    border: none !important;
+}
+
+/* --- PERBAIKAN TABEL 3 KOLOM (Mobile Friendly) --- */
+.table-header-clean th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Kolom Stok Awal (Tengah) */
+.col-stok-awal {
+    width: 15%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Kolom Stok Akhir (Kanan) */
+.col-stok-akhir {
+    width: 30%; /* Cukup lebar untuk tombol +/- */
+    text-align: right;
+    vertical-align: middle;
+}
+
+/* Kolom Produk (Sisanya) */
+.col-produk {
+    vertical-align: middle;
+}
+
+/* Tombol hapus tetap melayang tapi lebih rapi */
+.btn-delete-floating {
+    top: 5px;
+    right: 5px;
 }

@@ -1740,17 +1740,31 @@ async function handleAddNewProduct(e) {
     showToast(result.message, result.success);
 
     if (result.success) {
-      // 4. Update State Lokal (Agar langsung muncul tanpa refresh)
+      // 4. Update State Lokal
     const newProductEntry = {
-          id: result.product.id,
-          name: result.product.name,
-          // Pastikan supplier_id ada (ambil dari result atau variable lokal)
-          supplier_id: result.product.supplier_id || supplierId, 
-          harga_beli: parseFloat(result.product.harga_beli),
-          harga_jual: parseFloat(result.product.harga_jual)
-      };
+        id: parseInt(result.product.id), // Paksa jadi Integer
+        name: result.product.name,
+        // PERBAIKAN UTAMA: Paksa supplier_id jadi Integer agar tidak bikin grup ganda
+        supplier_id: parseInt(result.product.supplier_id || supplierId), 
+        harga_beli: parseFloat(result.product.harga_beli),
+        harga_jual: parseFloat(result.product.harga_jual),
+        // Tambahkan stokAwal default 0 agar tidak error saat render
+        stokAwal: 0 
+    };
 
-      AppState.masterData.products.push(result.product);
+    // Masukkan ke master data
+    AppState.masterData.products.push(newProductEntry);
+
+    // Otomatis pilih produk yang baru ditambah
+    // Pastikan value checkbox juga integer agar match
+    setTimeout(() => {
+        const checkbox = document.querySelector(`.product-checkbox[value="${newProductEntry.id}"]`);
+        if (checkbox) {
+            checkbox.checked = true;
+            // Trigger event change agar tabel terupdate otomatis
+            checkbox.dispatchEvent(new Event('change'));
+        }
+    }, 100);
 
       // 5. Reset Form
       document.getElementById("new-product-name-input").value = '';
@@ -1857,16 +1871,18 @@ function generateReportTables() {
 
   if (hasInvalidStok) return showToast("Stok awal wajib diisi.", false);
 
+  // Sembunyikan prompt, tampilkan tabel
   const initialPrompt = document.getElementById("initial-prompt");
   if (initialPrompt) initialPrompt.style.display = 'none';
   document.getElementById("product-search-container").style.display = 'block';
 
-  // --- RENDER GROUP SUPPLIER ---
+  // --- RENDER PER SUPPLIER ---
   productsToDisplay.forEach(productData => {
     const supplier = AppState.masterData.suppliers.find(s => s.id === productData.supplier_id);
     const supplierGroupId = `supplier-group-${supplier.id}`;
     let supplierGroup = document.getElementById(supplierGroupId);
 
+    // 1. JIKA GROUP SUPPLIER BELUM ADA, BUAT BARU DENGAN HEADER 3 KOLOM
     if (!supplierGroup) {
       const newGroup = document.createElement('div');
       newGroup.id = supplierGroupId;
@@ -1876,25 +1892,24 @@ function generateReportTables() {
         ? `<span class="badge bg-light text-secondary border me-2">${supplier.metode_pembayaran}</span>` 
         : '';
 
-      // HEADER BARU: Total Akhir langsung di judul
       newGroup.innerHTML = `
           <div class="px-3 py-3 bg-light border-bottom d-flex justify-content-between align-items-center">
               <div class="d-flex align-items-center overflow-hidden">
                 <i class="bi bi-shop me-2 text-primary"></i>
-                <div>
-                    <h6 class="mb-0 fw-bold text-dark text-truncate">${supplier.name}</h6>
-                    <small class="text-muted" style="font-size: 0.75rem;">Total Awal: <span class="supplier-total-awal fw-bold">0</span></small>
-                </div>
+                <h6 class="mb-0 fw-bold text-dark text-truncate">${supplier.name}</h6>
               </div>
-              
-              <div class="text-end ms-2">
-                 <span class="d-block small text-muted text-uppercase" style="font-size: 0.65rem;">Total Akhir</span>
-                 <span class="supplier-total-akhir fw-bold text-primary fs-5" style="line-height: 1;">0</span>
-              </div>
+              ${paymentMethod}
           </div>
           
           <div class="table-responsive">
-              <table class="table table-borderless align-middle mb-0">
+              <table class="table table-borderless mb-0">
+                  <thead class="table-header-clean">
+                      <tr>
+                          <th class="ps-3 col-produk">Produk</th>
+                          <th class="col-stok-awal">Awal</th>
+                          <th class="pe-3 col-stok-akhir">Akhir</th>
+                      </tr>
+                  </thead>
                   <tbody class="bg-white"></tbody>
               </table>
           </div>
@@ -1906,6 +1921,7 @@ function generateReportTables() {
     const tableBody = supplierGroup.querySelector('tbody');
     const isProductExist = tableBody.querySelector(`tr[data-product-id="${productData.id}"]`);
 
+    // 2. JIKA PRODUK BELUM ADA, TAMBAHKAN BARIS (Pastikan createProductRow 3 kolom juga)
     if (!isProductExist) {
       let rowHtml = createProductRow(productData, supplier);
       const tempTbody = document.createElement('tbody');
@@ -1914,7 +1930,7 @@ function generateReportTables() {
 
       if (newRow) {
         newRow.querySelector('.stok-awal').value = productData.stokAwal;
-        newRow.querySelector('.stok-akhir').value = productData.stokAwal;
+        newRow.querySelector('.stok-akhir').value = productData.stokAwal; // Default sisa = awal
         attachEventListenersToRow(newRow);
         tableBody.appendChild(newRow);
         updateRowAndTotals(newRow);
@@ -1930,57 +1946,50 @@ function generateReportTables() {
   modals.aturProduk.hide();
   updateProgressBar(66);
   showToast("Produk ditambahkan.", true);
-  document.getElementById("report-tables-container").scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // app/static/js/main.js
 
 function createProductRow(product, supplier) {
-  // Input stok akhir (tanpa perubahan logika, hanya layout)
+  // Input Stok Akhir
   const stokAkhirInput = `
-      <div class="input-group input-group-sm flex-nowrap shadow-sm input-stok-container" style="width: 125px;">
-          <button class="btn btn-outline-secondary btn-minus px-2 border-end-0" type="button" style="background-color: #f8f9fa;">
+      <div class="input-group input-group-sm flex-nowrap shadow-sm input-stok-container ms-auto" style="width: 120px;">
+          <button class="btn btn-outline-secondary btn-minus px-2 border-end-0 bg-light" type="button">
             <i class="bi bi-dash-lg"></i>
           </button>
-          
           <input type="number" 
                  class="form-control text-center input-stok stok-akhir fw-bold text-dark border-start-0 border-end-0" 
-                 placeholder="0" 
-                 min="0"
-                 style="font-size: 1.1rem; padding: 0;">
-                 
-          <button class="btn btn-outline-secondary btn-plus px-2 border-start-0" type="button" style="background-color: #f8f9fa;">
+                 placeholder="0" min="0" style="font-size: 1rem;">
+          <button class="btn btn-outline-secondary btn-plus px-2 border-start-0 bg-light" type="button">
             <i class="bi bi-plus-lg"></i>
           </button>
       </div>`;
 
-  // PERUBAHAN:
-  // 1. Tombol Hapus dipindah ke pojok kanan atas (btn-delete-floating)
-  // 2. Kolom tabel dikurangi jadi 2 saja (Nama & Input) agar lebar maksimal
-  
   return `
       <tr class="product-row border-bottom" data-product-id="${product.id}" data-harga-jual="${product.harga_jual}" data-harga-beli="${product.harga_beli}">
-          <td class="py-3 ps-3 align-middle" style="width: 60%;">
-            <button class="btn-delete-floating" onclick="removeProductFromTable(this)" title="Hapus Produk">
-                <i class="bi bi-x-lg"></i>
-            </button>
           
-            <div class="fw-bold text-dark text-wrap mb-1 pe-2" style="font-size: 0.95rem; line-height: 1.3;">
+          <td class="py-3 ps-3 col-produk position-relative">
+            <button class="btn-delete-floating position-absolute border-0 bg-transparent text-muted opacity-50" onclick="removeProductFromTable(this)">
+                <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
+            </button>
+            
+            <div class="fw-bold text-dark text-wrap pe-3" style="font-size: 0.9rem; line-height: 1.3;">
                 ${product.name}
             </div>
-            
-            <div class="d-flex align-items-center gap-2 mt-1">
-               <span class="badge bg-light text-secondary border fw-normal">
-                  Awal: <input type="hidden" class="stok-awal" value="${product.stokAwal}"><strong>${product.stokAwal}</strong>
-               </span>
-               <small class="text-muted" style="font-size: 0.75rem;">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
-            </div>
+            <small class="text-muted d-block mt-1">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
           </td>
           
-          <td class="py-3 align-middle text-end pe-3">
-            <div class="d-flex justify-content-end">
-              ${stokAkhirInput}
-            </div>
+          <td class="py-3 col-stok-awal">
+             <div class="d-flex flex-column align-items-center">
+                <span class="badge bg-light text-secondary border fw-bold fs-6">
+                    ${product.stokAwal}
+                </span>
+                <input type="hidden" class="stok-awal" value="${product.stokAwal}">
+             </div>
+          </td>
+          
+          <td class="py-3 pe-3 col-stok-akhir">
+            ${stokAkhirInput}
           </td>
       </tr>`;
 }
