@@ -574,3 +574,129 @@ input[type="number"] {
     top: 5px;
     right: 5px;
 }
+
+/* --- MOBILE BOTTOM SHEET MODAL --- */
+@media (max-width: 575.98px) {
+    /* Ubah posisi modal menjadi menempel di bawah */
+    .modal-dialog {
+        position: fixed;
+        margin: 0;
+        width: 100%;
+        height: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        /* Animasi slide up yang lebih halus */
+        transform: translate(0, 100%) !important;
+        transition: transform 0.3s ease-out !important;
+    }
+
+    /* Saat modal muncul (class .show ditambahkan oleh Bootstrap) */
+    .modal.show .modal-dialog {
+        transform: translate(0, 0) !important;
+    }
+
+    .modal-content {
+        height: auto;
+        max-height: 85vh; /* Jangan penuhi layar, sisakan sedikit di atas */
+        border-radius: 1.5rem 1.5rem 0 0; /* Sudut atas membulat */
+        border: none;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header Modal */
+    .modal-header {
+        border-bottom: 1px solid #f8f9fa;
+        padding: 1.25rem 1.5rem 0.5rem 1.5rem;
+        position: relative;
+        background: #fff;
+        border-radius: 1.5rem 1.5rem 0 0;
+        flex-shrink: 0; /* Header jangan mengecil */
+    }
+
+    /* Indikator "Geser" (Garis kecil di tengah atas) */
+    .modal-header::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background-color: #e9ecef;
+        border-radius: 2px;
+    }
+
+    /* Judul Modal */
+    .modal-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        width: 100%;
+        text-align: center; /* Judul di tengah */
+        margin-top: 10px;
+    }
+    
+    /* Tombol Close di pojok kanan (Absolute) */
+    .modal-header .btn-close {
+        position: absolute;
+        top: 18px;
+        right: 20px;
+        margin: 0;
+        padding: 0.5rem;
+        z-index: 10;
+    }
+
+    /* Body Modal (Bisa di-scroll jika konten panjang) */
+    .modal-body {
+        overflow-y: auto; /* Scrollable */
+        padding: 1.5rem;
+        -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
+    }
+
+    /* Footer Modal (Tombol Aksi) */
+    .modal-footer {
+        border-top: 1px solid #f8f9fa;
+        padding: 1rem 1.5rem;
+        background: #fff;
+        flex-wrap: nowrap; /* Tombol jangan turun baris */
+        gap: 10px;
+        flex-shrink: 0; /* Footer jangan mengecil */
+    }
+
+    /* Tombol di dalam modal agar lebih mudah ditekan */
+    .modal-footer .btn {
+        width: 100%; /* Tombol full width */
+        padding: 0.8rem;
+        border-radius: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Input form lebih besar dan nyaman */
+    .modal-body .form-control, 
+    .modal-body .form-select {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        border-radius: 0.8rem;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        background-color: #fff;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+    }
+    
+    .modal-body label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+    }
+}

@@ -2076,9 +2076,19 @@ async function populateLapakDashboard() {
     return;
   }
 
-  // Reset tabel jika ada sisa data lama di DOM
-  initialPrompt.style.display = "block";
-  document.getElementById("product-search-container").style.display = "none";
+  // --- PERBAIKAN DI SINI: Reset Kontainer Tabel Sepenuhnya ---
+  // Kita buat ulang elemen #initial-prompt agar tidak error saat dipanggil
+  const tablesContainer = document.getElementById("report-tables-container");
+  tablesContainer.innerHTML = `
+      <div id="initial-prompt" class="text-center text-muted p-5 border rounded">
+          <i class="bi bi-ui-checks-grid" style="font-size: 3rem;"></i><h5 class="mt-3">Mulai Laporan Harian</h5>
+          <p>Klik "Atur Produk" di atas untuk memilih produk yang akan dijual hari ini.</p>
+      </div>`;
+  
+  // Sembunyikan search container saat awal
+  const searchContainer = document.getElementById("product-search-container");
+  if (searchContainer) searchContainer.style.display = "none";
+  // -----------------------------------------------------------
 
   try {
     const resp = await fetch(`/api/get_data_buat_catatan/${lapakId}`);
@@ -2400,7 +2410,15 @@ function loadReportStateFromLocalStorage() {
       }
 
       const tableBody = supplierGroup.querySelector('tbody');
-      let rowHtml = createProductRow(product, supplier);
+      // --- PERBAIKAN UTAMA DI SINI ---
+      // Gabungkan data produk asli dengan stokAwal yang disimpan di localStorage
+      // Agar saat createProductRow dipanggil, property .stokAwal tidak undefined
+      const productWithData = { 
+          ...product, stokAwal: item.stokAwal 
+      };
+
+      let rowHtml = createProductRow(productWithData, supplier);
+      // -------------------------------
       const tempTbody = document.createElement('tbody');
       tempTbody.innerHTML = rowHtml;
       const newRow = tempTbody.querySelector('tr');
