@@ -89,31 +89,51 @@ def get_owner_verification_reports(owner_id):
 @owner_bp.route('/api/add_admin', methods=['POST'])
 def add_admin():
     data = request.json
-    if data['password'] != data['password_confirm']: return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+    if data['password'] != data['password_confirm']: 
+        return jsonify({"success": False, "message": "Password tidak cocok."}), 400
     try:
+        # Tentukan role
+        role = 'staff'
+        if data.get('super_owner_id'):
+            role = 'owner'
+
         new_admin = Admin(
-            nama_lengkap=data['nama_lengkap'], username=data['username'], email=data['email'], 
-            nomor_kontak=data['nomor_kontak'], password=data['password'],
-            super_owner_id=data.get('super_owner_id'), created_by_owner_id=data.get('created_by_owner_id')
+            nama_lengkap=data['nama_lengkap'], 
+            username=data['username'], 
+            email=data['email'], 
+            nomor_kontak=data['nomor_kontak'],
+            # JANGAN SET PASSWORD LANGSUNG DI SINI
+            super_owner_id=data.get('super_owner_id'), 
+            created_by_owner_id=data.get('created_by_owner_id'),
+            role=role
         )
+        new_admin.set_password(data['password']) # [SECURITY] Hash password
+        
         db.session.add(new_admin)
         db.session.commit()
         return jsonify({"success": True, "message": "Admin berhasil ditambahkan"})
     except IntegrityError:
         db.session.rollback()
-        return jsonify({"success": False, "message": "Gagal: Data duplikat."}), 400
+        return jsonify({"success": False, "message": "Gagal: Username atau Email sudah ada."}), 400
 
 @owner_bp.route('/api/update_admin/<int:admin_id>', methods=['PUT'])
 def update_admin(admin_id):
     data = request.json
     admin = Admin.query.get_or_404(admin_id)
-    if data.get('password') and data['password'] != data['password_confirm']: return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+    if data.get('password'):
+        if data['password'] != data['password_confirm']:
+            return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+            
     try:
         admin.nama_lengkap = data['nama_lengkap']
         admin.username = data['username']
         admin.email = data['email']
         admin.nomor_kontak = data['nomor_kontak']
-        if data.get('password'): admin.password = data['password']
+        
+        # [SECURITY] Hanya update password jika diisi, dan lakukan hashing
+        if data.get('password'): 
+            admin.set_password(data['password'])
+            
         db.session.commit()
         return jsonify({"success": True, "message": "Data Admin diperbarui"})
     except IntegrityError:
@@ -163,29 +183,26 @@ def delete_lapak(lapak_id):
     return jsonify({"success": True, "message": "Lapak dihapus"})
 
 # --- MANAJEMEN SUPPLIER ---
-@owner_bp.route('/api/get_next_supplier_reg_number/<int:owner_id>', methods=['GET'])
-def get_next_supplier_reg_number(owner_id):
-    suppliers = Supplier.query.filter_by(owner_id=owner_id).all()
-    used_numbers = set()
-    for s in suppliers:
-        match = re.match(r'^REG(\d+)$', s.nomor_register)
-        if match: used_numbers.add(int(match.group(1)))
-    next_id = 1
-    while next_id in used_numbers: next_id += 1
-    return jsonify({"success": True, "reg_number": f"REG{next_id:03d}"})
-
 @owner_bp.route('/api/add_supplier', methods=['POST'])
 def add_supplier():
     data = request.json
-    if data['password'] != data['password_confirm']: return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+    if data['password'] != data['password_confirm']: 
+        return jsonify({"success": False, "message": "Password tidak cocok."}), 400
     try:
         new_supplier = Supplier(
-            nama_supplier=data['nama_supplier'], username=data.get('username'), kontak=data.get('kontak'),
-            nomor_register=data.get('nomor_register'), alamat=data.get('alamat'), password=data['password'],
-            metode_pembayaran=data.get('metode_pembayaran'), nomor_rekening=data.get('nomor_rekening'),
+            nama_supplier=data['nama_supplier'], 
+            username=data.get('username'), 
+            kontak=data.get('kontak'),
+            nomor_register=data.get('nomor_register'), 
+            alamat=data.get('alamat'), 
+            # PASSWORD JANGAN DI SET LANGSUNG
+            metode_pembayaran=data.get('metode_pembayaran'), 
+            nomor_rekening=data.get('nomor_rekening'),
             owner_id=data.get('owner_id')
         )
+        new_supplier.set_password(data['password']) # [SECURITY] Hash password
         new_supplier.balance = SupplierBalance(balance=0.0)
+        
         db.session.add(new_supplier)
         db.session.commit()
         return jsonify({"success": True, "message": "Supplier ditambahkan"})
@@ -197,7 +214,11 @@ def add_supplier():
 def update_supplier(supplier_id):
     data = request.json
     supplier = Supplier.query.get_or_404(supplier_id)
-    if data.get('password') and data['password'] != data['password_confirm']: return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+    
+    if data.get('password'):
+        if data['password'] != data['password_confirm']:
+             return jsonify({"success": False, "message": "Password tidak cocok."}), 400
+             
     try:
         supplier.nama_supplier = data['nama_supplier']
         supplier.username = data.get('username')
@@ -205,7 +226,11 @@ def update_supplier(supplier_id):
         supplier.alamat = data.get('alamat')
         supplier.metode_pembayaran = data.get('metode_pembayaran')
         supplier.nomor_rekening = data.get('nomor_rekening')
-        if data.get('password'): supplier.password = data['password']
+        
+        # [SECURITY] Update password dengan hash
+        if data.get('password'): 
+            supplier.set_password(data['password'])
+            
         db.session.commit()
         return jsonify({"success": True, "message": "Data Supplier diperbarui"})
     except IntegrityError:

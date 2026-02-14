@@ -1,6 +1,7 @@
 import datetime
 from datetime import timedelta
 from sqlalchemy.sql import func
+from werkzeug.security import generate_password_hash, check_password_hash # [TAMBAHAN BARU]
 from app.extensions import db
 
 # -- KONSTANTA & SETTINGS --
@@ -26,52 +27,68 @@ class SuperOwner(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     nomor_kontak = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(255), nullable=False) # Ubah panjang ke 255 untuk hash
     owners = db.relationship('Admin', backref='super_owner', lazy=True)
+
+    # [TAMBAHAN SECURITY]
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 class Admin(db.Model):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
     nama_lengkap = db.Column(db.String(100), nullable=False)
-    # Hapus unique=True di sini agar aturan unik per-owner di bawah bisa jalan
     username = db.Column(db.String(80), nullable=False) 
     email = db.Column(db.String(120), nullable=False)
     nomor_kontak = db.Column(db.String(20), nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(255), nullable=False) # Ubah panjang ke 255
     
-    # [PERBAIKAN 2] Menambahkan kolom Role eksplisit
-    # values: 'owner', 'staff'
+    # Kolom Role (Dari perbaikan sebelumnya)
     role = db.Column(db.String(20), default='staff', nullable=False) 
 
-    # --- PERBAIKAN DI SINI (Ubah False jadi True) ---
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=True)
     created_by_owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
-    # -----------------------------------------------
 
     __table_args__ = (
         db.UniqueConstraint('created_by_owner_id', 'username', name='_owner_username_uc'),
         db.UniqueConstraint('created_by_owner_id', 'email', name='_owner_email_uc')
     )
+
+    # [TAMBAHAN SECURITY]
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
     
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama_supplier = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(80), nullable=False) # Hapus unique=True
+    username = db.Column(db.String(80), nullable=False) 
     kontak = db.Column(db.String(20), nullable=True)
-    nomor_register = db.Column(db.String(50), nullable=True) # Hapus unique=True
+    nomor_register = db.Column(db.String(50), nullable=True) 
     alamat = db.Column(db.Text, nullable=True)
-    password = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(255), nullable=False) # Ubah panjang ke 255
     metode_pembayaran = db.Column(db.String(20), nullable=True)
     nomor_rekening = db.Column(db.String(50), nullable=True)
     owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
     products = db.relationship('Product', backref='supplier', lazy=True, cascade="all, delete-orphan")
     balance = db.relationship('SupplierBalance', backref='supplier', uselist=False, cascade="all, delete-orphan")
 
-    # TAMBAHKAN INI: Aturan unik baru per owner
     __table_args__ = (
         db.UniqueConstraint('owner_id', 'username', name='_owner_supplier_username_uc'),
         db.UniqueConstraint('owner_id', 'nomor_register', name='_owner_supplier_reg_uc')
     )
+
+    # [TAMBAHAN SECURITY]
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
     
 # -- MODEL BISNIS --
 class Lapak(db.Model):
@@ -92,11 +109,8 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama_produk = db.Column(db.String(100), nullable=False)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=True)
-    
-    # [PERBAIKAN 1] Ganti Float ke Numeric(15, 2) untuk presisi uang
     harga_beli = db.Column(db.Numeric(15, 2), nullable=False, default=HARGA_BELI_DEFAULT)
     harga_jual = db.Column(db.Numeric(15, 2), nullable=False, default=HARGA_JUAL_DEFAULT)
-    
     is_manual = db.Column(db.Boolean, default=False, nullable=False)
     lapaks = db.relationship('Lapak', secondary=product_lapak_association, lazy='subquery',
                              backref=db.backref('products', lazy=True))
@@ -114,25 +128,19 @@ class LaporanHarian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lapak_id = db.Column(db.Integer, db.ForeignKey('lapak.id'), nullable=False)
     tanggal = db.Column(db.Date, nullable=False, default=datetime.date.today)
-    
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     total_pendapatan = db.Column(db.Numeric(15, 2), nullable=False)
     total_biaya_supplier = db.Column(db.Numeric(15, 2), nullable=False, default=0)
     pendapatan_cash = db.Column(db.Numeric(15, 2), nullable=False)
     pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=False)
     pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=False) 
-    
     total_produk_terjual = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(20), default='Menunggu Konfirmasi')
-    
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     manual_pendapatan_cash = db.Column(db.Numeric(15, 2), nullable=True)
     manual_pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=True)
     manual_pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=True)
     manual_total_pendapatan = db.Column(db.Numeric(15, 2), nullable=True)
     keuntungan_owner = db.Column(db.Numeric(15, 2), nullable=True, default=0.0)
     keuntungan_superowner = db.Column(db.Numeric(15, 2), nullable=True, default=0.0)
-    
     rincian_produk = db.relationship('LaporanHarianProduk', backref='laporan', lazy=True, cascade="all, delete-orphan")
 
 class LaporanHarianProduk(db.Model):
@@ -142,26 +150,20 @@ class LaporanHarianProduk(db.Model):
     stok_awal = db.Column(db.Integer, nullable=False)
     stok_akhir = db.Column(db.Integer, nullable=False)
     jumlah_terjual = db.Column(db.Integer, nullable=False)
-    
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     total_harga_jual = db.Column(db.Numeric(15, 2), nullable=False)
     total_harga_beli = db.Column(db.Numeric(15, 2), nullable=False)
-    
     product = db.relationship('Product')
 
 class SupplierBalance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), unique=True, nullable=False)
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     balance = db.Column(db.Numeric(15, 2), nullable=False, default=0.0)
     
 class SuperOwnerBalance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     balance = db.Column(db.Numeric(15, 2), nullable=False, default=0.0)
-    
     super_owner = db.relationship('SuperOwner')
     owner = db.relationship('Admin')
     __table_args__ = (db.UniqueConstraint('super_owner_id', 'owner_id', name='_superowner_owner_uc'),)
@@ -170,7 +172,6 @@ class PembayaranSupplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
     tanggal_pembayaran = db.Column(db.Date, nullable=False, default=datetime.date.today)
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     jumlah_pembayaran = db.Column(db.Numeric(15, 2), nullable=False)
     metode_pembayaran = db.Column(db.String(20), nullable=False) 
     supplier = db.relationship('Supplier')
@@ -190,7 +191,6 @@ class RiwayatPenarikanSuperOwner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
-    # [PERBAIKAN 1] Ganti Float ke Numeric
     jumlah_penarikan = db.Column(db.Numeric(15, 2), nullable=False)
     tanggal_penarikan = db.Column(db.DateTime, server_default=func.now())
     super_owner = db.relationship('SuperOwner')
