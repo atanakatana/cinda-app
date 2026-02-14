@@ -1661,24 +1661,34 @@ function updateProductSelection(event) {
     const productsOfSupplier = AppState.masterData.products.filter(p =>
       p.supplier_id === supplierId && p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    // Di dalam fungsi updateProductSelection -> renderProducts
+
     if (productsOfSupplier.length === 0) {
       productContainer.innerHTML = '<p class="text-muted small p-2">Belum ada produk...</p>';
     } else {
       productContainer.innerHTML = productsOfSupplier.map(p => `
-              <div class="input-group input-group-sm mb-2">
+              <div class="input-group mb-3 mobile-product-row">
+                  
                   <div class="input-group-text">
                       <input class="form-check-input mt-0 product-checkbox" type="checkbox" value="${p.id}" id="modal-product-${p.id}">
                   </div>
-                  <label for="modal-product-${p.id}" class="form-control d-flex justify-content-between align-items-center">
-                    <span>${p.name}</span>
-                    <span class="badge bg-light text-dark border">Beli: ${p.harga_beli} | Jual: ${p.harga_jual}</span>
+                  
+                  <label for="modal-product-${p.id}" class="form-label-custom user-select-none">
+                    <span class="fw-bold text-dark d-block text-truncate" style="font-size: 0.95rem;">${p.name}</span>
+                    <span class="text-muted small d-block" style="font-size: 0.75rem;">
+                       Beli: ${formatCurrency(p.harga_beli)} | Jual: ${formatCurrency(p.harga_jual)}
+                    </span>
                   </label>
                   
-                  <button class="btn btn-outline-secondary" type="button" onclick="openEditProductModal(${p.id})">
-                    <i class="bi bi-pencil"></i>
+                  <button class="btn btn-edit-mobile" type="button" onclick="openEditProductModal(${p.id})">
+                    <i class="bi bi-pencil-square" style="font-size: 1.2rem;"></i>
                   </button>
 
-                  <input type="number" class="form-control form-control-sm text-center modal-stok-awal" placeholder="Stok Awal" style="max-width: 80px;" disabled>
+                  <input type="number" 
+                         class="form-control text-center modal-stok-awal" 
+                         placeholder="0" 
+                         style="max-width: 70px;" 
+                         disabled>
               </div>
           `).join('');
     }
@@ -1950,45 +1960,55 @@ function generateReportTables() {
 
 // app/static/js/main.js
 
+// app/static/js/main.js
+
 function createProductRow(product, supplier) {
-  // Input Stok Akhir
+  // Input Stok Akhir dengan Style "Clean"
   const stokAkhirInput = `
-      <div class="input-group input-group-sm flex-nowrap shadow-sm input-stok-container ms-auto" style="width: 120px;">
-          <button class="btn btn-outline-secondary btn-minus px-2 border-end-0 bg-light" type="button">
-            <i class="bi bi-dash-lg"></i>
+      <div class="input-group input-group-sm input-group-clean d-flex align-items-center justify-content-center shadow-sm" style="width: 110px; margin-left: auto;">
+          <button class="btn btn-minus" type="button">
+            <i class="bi bi-dash-lg" style="font-size: 0.9rem;"></i>
           </button>
+          
           <input type="number" 
-                 class="form-control text-center input-stok stok-akhir fw-bold text-dark border-start-0 border-end-0" 
-                 placeholder="0" min="0" style="font-size: 1rem;">
-          <button class="btn btn-outline-secondary btn-plus px-2 border-start-0 bg-light" type="button">
-            <i class="bi bi-plus-lg"></i>
+                 class="form-control text-center input-stok stok-akhir" 
+                 placeholder="0" min="0" 
+                 style="font-size: 1rem; max-width: 40px;">
+                 
+          <button class="btn btn-plus" type="button">
+            <i class="bi bi-plus-lg" style="font-size: 0.9rem;"></i>
           </button>
       </div>`;
 
   return `
-      <tr class="product-row border-bottom" data-product-id="${product.id}" data-harga-jual="${product.harga_jual}" data-harga-beli="${product.harga_beli}">
+      <tr class="product-row clean-row" data-product-id="${product.id}" data-harga-jual="${product.harga_jual}" data-harga-beli="${product.harga_beli}">
           
-          <td class="py-3 ps-3 col-produk position-relative">
-            <button class="btn-delete-floating position-absolute border-0 bg-transparent text-muted opacity-50" onclick="removeProductFromTable(this)">
-                <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
-            </button>
-            
-            <div class="fw-bold text-dark text-wrap pe-3" style="font-size: 0.9rem; line-height: 1.3;">
+          <td class="py-3 ps-3 col-produk align-middle">
+            <div class="product-name-text fw-bold text-wrap">
                 ${product.name}
             </div>
-            <small class="text-muted d-block mt-1">Terjual: <span class="terjual-pcs fw-bold text-success">0</span></small>
+            
+            <div class="d-flex align-items-center gap-3">
+               <span class="product-meta-text">
+                  Terjual: <span class="terjual-pcs fw-bold text-success">0</span>
+               </span>
+               
+               <button class="btn btn-link text-muted p-0 text-decoration-none" onclick="removeProductFromTable(this)" style="font-size: 0.75rem;">
+                   <i class="bi bi-trash me-1"></i>Hapus
+               </button>
+            </div>
           </td>
           
-          <td class="py-3 col-stok-awal">
-             <div class="d-flex flex-column align-items-center">
-                <span class="badge bg-light text-secondary border fw-bold fs-6">
+          <td class="py-3 col-stok-awal align-middle">
+             <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                <span class="fw-bold text-secondary" style="font-size: 1rem;">
                     ${product.stokAwal}
                 </span>
                 <input type="hidden" class="stok-awal" value="${product.stokAwal}">
              </div>
           </td>
           
-          <td class="py-3 pe-3 col-stok-akhir">
+          <td class="py-3 pe-3 col-stok-akhir align-middle">
             ${stokAkhirInput}
           </td>
       </tr>`;

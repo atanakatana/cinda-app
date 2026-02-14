@@ -39,6 +39,10 @@ class Admin(db.Model):
     nomor_kontak = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(128), nullable=False)
     
+    # [PERBAIKAN 2] Menambahkan kolom Role eksplisit
+    # values: 'owner', 'staff'
+    role = db.Column(db.String(20), default='staff', nullable=False) 
+
     # --- PERBAIKAN DI SINI (Ubah False jadi True) ---
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=True)
     created_by_owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
@@ -88,8 +92,11 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama_produk = db.Column(db.String(100), nullable=False)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=True)
-    harga_beli = db.Column(db.Float, nullable=False, default=HARGA_BELI_DEFAULT)
-    harga_jual = db.Column(db.Float, nullable=False, default=HARGA_JUAL_DEFAULT)
+    
+    # [PERBAIKAN 1] Ganti Float ke Numeric(15, 2) untuk presisi uang
+    harga_beli = db.Column(db.Numeric(15, 2), nullable=False, default=HARGA_BELI_DEFAULT)
+    harga_jual = db.Column(db.Numeric(15, 2), nullable=False, default=HARGA_JUAL_DEFAULT)
+    
     is_manual = db.Column(db.Boolean, default=False, nullable=False)
     lapaks = db.relationship('Lapak', secondary=product_lapak_association, lazy='subquery',
                              backref=db.backref('products', lazy=True))
@@ -107,19 +114,25 @@ class LaporanHarian(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lapak_id = db.Column(db.Integer, db.ForeignKey('lapak.id'), nullable=False)
     tanggal = db.Column(db.Date, nullable=False, default=datetime.date.today)
-    total_pendapatan = db.Column(db.Float, nullable=False)
-    total_biaya_supplier = db.Column(db.Float, nullable=False, default=0)
-    pendapatan_cash = db.Column(db.Float, nullable=False)
-    pendapatan_qris = db.Column(db.Float, nullable=False)
-    pendapatan_bca = db.Column(db.Float, nullable=False) 
+    
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    total_pendapatan = db.Column(db.Numeric(15, 2), nullable=False)
+    total_biaya_supplier = db.Column(db.Numeric(15, 2), nullable=False, default=0)
+    pendapatan_cash = db.Column(db.Numeric(15, 2), nullable=False)
+    pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=False)
+    pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=False) 
+    
     total_produk_terjual = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(20), default='Menunggu Konfirmasi')
-    manual_pendapatan_cash = db.Column(db.Float, nullable=True)
-    manual_pendapatan_qris = db.Column(db.Float, nullable=True)
-    manual_pendapatan_bca = db.Column(db.Float, nullable=True)
-    manual_total_pendapatan = db.Column(db.Float, nullable=True)
-    keuntungan_owner = db.Column(db.Float, nullable=True, default=0.0)
-    keuntungan_superowner = db.Column(db.Float, nullable=True, default=0.0)
+    
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    manual_pendapatan_cash = db.Column(db.Numeric(15, 2), nullable=True)
+    manual_pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=True)
+    manual_pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=True)
+    manual_total_pendapatan = db.Column(db.Numeric(15, 2), nullable=True)
+    keuntungan_owner = db.Column(db.Numeric(15, 2), nullable=True, default=0.0)
+    keuntungan_superowner = db.Column(db.Numeric(15, 2), nullable=True, default=0.0)
+    
     rincian_produk = db.relationship('LaporanHarianProduk', backref='laporan', lazy=True, cascade="all, delete-orphan")
 
 class LaporanHarianProduk(db.Model):
@@ -129,20 +142,25 @@ class LaporanHarianProduk(db.Model):
     stok_awal = db.Column(db.Integer, nullable=False)
     stok_akhir = db.Column(db.Integer, nullable=False)
     jumlah_terjual = db.Column(db.Integer, nullable=False)
-    total_harga_jual = db.Column(db.Float, nullable=False)
-    total_harga_beli = db.Column(db.Float, nullable=False)
+    
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    total_harga_jual = db.Column(db.Numeric(15, 2), nullable=False)
+    total_harga_beli = db.Column(db.Numeric(15, 2), nullable=False)
+    
     product = db.relationship('Product')
 
 class SupplierBalance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), unique=True, nullable=False)
-    balance = db.Column(db.Float, nullable=False, default=0.0)
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    balance = db.Column(db.Numeric(15, 2), nullable=False, default=0.0)
     
 class SuperOwnerBalance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
-    balance = db.Column(db.Float, nullable=False, default=0.0)
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    balance = db.Column(db.Numeric(15, 2), nullable=False, default=0.0)
     
     super_owner = db.relationship('SuperOwner')
     owner = db.relationship('Admin')
@@ -152,7 +170,8 @@ class PembayaranSupplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
     tanggal_pembayaran = db.Column(db.Date, nullable=False, default=datetime.date.today)
-    jumlah_pembayaran = db.Column(db.Float, nullable=False)
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    jumlah_pembayaran = db.Column(db.Numeric(15, 2), nullable=False)
     metode_pembayaran = db.Column(db.String(20), nullable=False) 
     supplier = db.relationship('Supplier')
 
@@ -171,7 +190,8 @@ class RiwayatPenarikanSuperOwner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     super_owner_id = db.Column(db.Integer, db.ForeignKey('super_owner.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
-    jumlah_penarikan = db.Column(db.Float, nullable=False)
+    # [PERBAIKAN 1] Ganti Float ke Numeric
+    jumlah_penarikan = db.Column(db.Numeric(15, 2), nullable=False)
     tanggal_penarikan = db.Column(db.DateTime, server_default=func.now())
     super_owner = db.relationship('SuperOwner')
     owner = db.relationship('Admin')

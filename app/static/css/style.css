@@ -575,49 +575,62 @@ input[type="number"] {
     right: 5px;
 }
 
-/* --- MOBILE BOTTOM SHEET MODAL --- */
+/* --- MOBILE BOTTOM SHEET MODAL (FINAL FIX) --- */
 @media (max-width: 575.98px) {
-    /* Ubah posisi modal menjadi menempel di bawah */
+    /* 1. Container Utama: Penuhi layar tapi konten didorong ke bawah */
     .modal-dialog {
-        position: fixed;
+        position: fixed; /* Tetap fixed agar stabil */
         margin: 0;
         width: 100%;
-        height: auto;
-        bottom: 0;
+        height: 100%; /* Penuhi tinggi layar */
+        padding: 0;
         left: 0;
-        right: 0;
-        max-width: 100%;
-        /* Animasi slide up yang lebih halus */
-        transform: translate(0, 100%) !important;
-        transition: transform 0.3s ease-out !important;
+        bottom: 0;
+        
+        display: flex;
+        align-items: flex-end; /* Dorong konten ke paling bawah */
+        justify-content: center;
+        
+        pointer-events: none; /* Biarkan klik tembus di area kosong atas */
+        transform: translate(0, 100%);
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        z-index: 1060;
     }
 
-    /* Saat modal muncul (class .show ditambahkan oleh Bootstrap) */
+    /* Saat modal muncul, geser ke posisi normal */
     .modal.show .modal-dialog {
         transform: translate(0, 0) !important;
     }
 
+    /* 2. Kartu Modal: Batasi tinggi & aktifkan scroll */
     .modal-content {
-        height: auto;
-        max-height: 85vh; /* Jangan penuhi layar, sisakan sedikit di atas */
-        border-radius: 1.5rem 1.5rem 0 0; /* Sudut atas membulat */
+        width: 100%;
+        /* Maksimal 85% layar, sisanya ruang kosong di atas */
+        max-height: 85vh; 
+        
         border: none;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+        
         display: flex;
-        flex-direction: column;
+        flex-direction: column; /* Susun Header-Body-Footer vertikal */
+        
+        background-color: #fff;
+        pointer-events: auto; /* Aktifkan klik di dalam modal */
+        overflow: hidden; /* Pastikan anak elemen tidak keluar radius */
     }
 
-    /* Header Modal */
+    /* 3. Header: Statis (Tidak ikut scroll) */
     .modal-header {
-        border-bottom: 1px solid #f8f9fa;
-        padding: 1.25rem 1.5rem 0.5rem 1.5rem;
+        flex-shrink: 0; /* Jangan mengecil */
+        border-bottom: 1px solid #f0f0f0;
+        padding: 25px 20px 15px 20px; /* Padding atas untuk handle */
         position: relative;
         background: #fff;
-        border-radius: 1.5rem 1.5rem 0 0;
-        flex-shrink: 0; /* Header jangan mengecil */
+        border-radius: 20px 20px 0 0;
     }
 
-    /* Indikator "Geser" (Garis kecil di tengah atas) */
+    /* Garis Handle (Pegangan) */
     .modal-header::before {
         content: "";
         position: absolute;
@@ -625,66 +638,48 @@ input[type="number"] {
         left: 50%;
         transform: translateX(-50%);
         width: 40px;
-        height: 4px;
-        background-color: #e9ecef;
-        border-radius: 2px;
+        height: 5px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
     }
 
-    /* Judul Modal */
     .modal-title {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #333;
+        text-align: center;
         width: 100%;
-        text-align: center; /* Judul di tengah */
-        margin-top: 10px;
+        margin: 0;
     }
-    
-    /* Tombol Close di pojok kanan (Absolute) */
+
+    /* Tombol Close */
     .modal-header .btn-close {
         position: absolute;
-        top: 18px;
+        top: 20px;
         right: 20px;
-        margin: 0;
-        padding: 0.5rem;
         z-index: 10;
     }
 
-    /* Body Modal (Bisa di-scroll jika konten panjang) */
+    /* 4. Body: Scrollable Area */
     .modal-body {
-        overflow-y: auto; /* Scrollable */
-        padding: 1.5rem;
-        -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
+        flex-grow: 1; /* Isi ruang yang tersisa */
+        overflow-y: auto; /* Scroll aktif jika konten panjang */
+        -webkit-overflow-scrolling: touch; /* Smooth scroll di iOS */
+        padding: 20px;
+        background-color: #fff;
     }
 
-    /* Footer Modal (Tombol Aksi) */
+    /* 5. Footer: Statis di bawah */
     .modal-footer {
-        border-top: 1px solid #f8f9fa;
-        padding: 1rem 1.5rem;
+        flex-shrink: 0; /* Jangan mengecil */
+        border-top: 1px solid #f0f0f0;
+        padding: 15px 20px;
         background: #fff;
-        flex-wrap: nowrap; /* Tombol jangan turun baris */
-        gap: 10px;
-        flex-shrink: 0; /* Footer jangan mengecil */
+        padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Aman untuk iPhone X+ */
     }
 
-    /* Tombol di dalam modal agar lebih mudah ditekan */
-    .modal-footer .btn {
-        width: 100%; /* Tombol full width */
-        padding: 0.8rem;
-        border-radius: 0.8rem;
-        font-weight: 600;
-    }
-
-    /* Input form lebih besar dan nyaman */
-    .modal-body .form-control, 
-    .modal-body .form-select {
-        padding: 0.8rem 1rem;
-        font-size: 1rem;
-        border-radius: 0.8rem;
-        margin-bottom: 1rem;
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-    }
+    /* Style Input & Tombol di Mobile */
+    .modal-footer .btn { width: 100%; border-radius: 10px; padding: 12px; }
+    .modal-body .form-control { padding: 12px; border-radius: 8px; font-size: 16px; }
     
     .modal-body .form-control:focus,
     .modal-body .form-select:focus {
@@ -699,4 +694,140 @@ input[type="number"] {
         color: #6c757d;
         margin-bottom: 0.4rem;
     }
+    
+}
+
+/* --- TAMPILAN BARIS PRODUK YANG LEBIH RAPI (CLEAN STYLE) --- */
+
+/* 1. Baris Tabel */
+.clean-row td {
+    border-bottom: 1px solid #f0f2f5; /* Garis pemisah super tipis */
+    transition: background-color 0.2s;
+}
+.clean-row:hover td {
+    background-color: #f8f9fa; /* Efek hover halus */
+}
+
+/* 2. Input Stok Modern (Tanpa Border Kotak) */
+.input-group-clean {
+    background-color: #f8f9fa;
+    border-radius: 8px; /* Sudut membulat */
+    padding: 2px;
+    border: 1px solid #e9ecef;
+}
+.input-group-clean .btn {
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    padding: 0 8px;
+}
+.input-group-clean .btn:active {
+    color: #0d6efd; /* Biru saat ditekan */
+    background: rgba(13, 110, 253, 0.1);
+    border-radius: 6px;
+}
+.input-group-clean .form-control {
+    background: transparent;
+    border: none;
+    font-weight: bold;
+    color: #212529;
+    padding: 0;
+}
+/* Hilangkan outline biru default saat klik */
+.input-group-clean .form-control:focus {
+    box-shadow: none; 
+}
+
+/* 3. Typography & Spacing */
+.product-name-text {
+    font-size: 0.95rem;
+    color: #2c3e50;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+.product-meta-text {
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+
+/* --- MOBILE MODAL PRODUCT LIST --- */
+
+/* Hapus input-group-sm default agar lebih besar di HP */
+.mobile-product-row {
+    height: 3.5rem; /* Tinggi baris yang nyaman untuk sentuhan */
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 1. Area Checkbox (Kiri) */
+.mobile-product-row .input-group-text {
+    width: 3.5rem; /* Lebar = Tinggi (Kotak) */
+    background-color: #f8f9fa; /* Warna latar sedikit beda */
+    border: none;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+/* Memperbesar ukuran fisik Checkbox */
+.mobile-product-row .product-checkbox {
+    width: 1.4rem;
+    height: 1.4rem;
+    cursor: pointer;
+    border-color: #adb5bd;
+}
+.mobile-product-row .product-checkbox:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* 2. Area Label (Tengah) */
+.mobile-product-row .form-label-custom {
+    border: none;
+    flex-grow: 1; /* Mengisi sisa ruang */
+    margin: 0;
+    padding: 0 0.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+/* 3. Area Tombol Edit & Input Stok (Kanan) */
+.mobile-product-row .btn-edit-mobile {
+    width: 3.5rem; /* Lebar = Tinggi (Kotak) */
+    border: none;
+    border-left: 1px solid #e9ecef;
+    border-radius: 0;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+.mobile-product-row .btn-edit-mobile:hover,
+.mobile-product-row .btn-edit-mobile:active {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+/* Input Stok Awal (Menempel di kanan) */
+.mobile-product-row .modal-stok-awal {
+    height: 100%;
+    border: none;
+    border-left: 1px solid #e9ecef;
+    border-radius: 0;
+    background-color: #fcfcfc;
+    font-weight: bold;
+    color: #0d6efd;
+    font-size: 1.1rem;
+}
+.mobile-product-row .modal-stok-awal:focus {
+    box-shadow: inset 0 0 0 2px rgba(13, 110, 253, 0.2);
 }
