@@ -134,7 +134,13 @@ class LaporanHarian(db.Model):
     pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=False)
     pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=False) 
     total_produk_terjual = db.Column(db.Integer, nullable=False)
+    
+    # Status bisa: 'Menunggu Konfirmasi', 'Terkonfirmasi', 'Revisi', 'Difinalisasi'
     status = db.Column(db.String(20), default='Menunggu Konfirmasi')
+    
+    # [TAMBAHAN FITUR REVISI]
+    catatan_revisi = db.Column(db.Text, nullable=True)
+
     manual_pendapatan_cash = db.Column(db.Numeric(15, 2), nullable=True)
     manual_pendapatan_qris = db.Column(db.Numeric(15, 2), nullable=True)
     manual_pendapatan_bca = db.Column(db.Numeric(15, 2), nullable=True)

@@ -306,7 +306,30 @@ def get_manage_reports():
         return jsonify({"success": True, "reports": report_list})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
+      
+@owner_bp.route('/api/reject_report/<int:report_id>', methods=['POST'])
+def reject_report(report_id):
+    data = request.json
+    catatan = data.get('catatan_revisi')
+    
+    if not catatan:
+        return jsonify({"success": False, "message": "Catatan revisi wajib diisi."}), 400
+        
+    try:
+        report = LaporanHarian.query.get_or_404(report_id)
+        
+        if report.status == 'Terkonfirmasi' or report.status == 'Difinalisasi':
+             return jsonify({"success": False, "message": "Laporan yang sudah dikonfirmasi tidak bisa dikembalikan."}), 400
+             
+        report.status = 'Revisi'
+        report.catatan_revisi = catatan
+        
+        db.session.commit()
+        return jsonify({"success": True, "message": "Laporan dikembalikan untuk direvisi."})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+      
 @owner_bp.route('/api/confirm_report/<int:report_id>', methods=['POST'])
 def confirm_report(report_id):
     try:
