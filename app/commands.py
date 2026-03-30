@@ -13,19 +13,22 @@ def seed_db_command():
 
     try:
         # -- membuat superowner awal --
-        super_owner = SuperOwner(username="cinda", password="cinda", nama_lengkap="Bos Cinda", email="cinda@gmail.com", nomor_kontak="081234567890")
+        super_owner = SuperOwner(username="cinda", nama_lengkap="Bos Cinda", email="cinda@gmail.com", nomor_kontak="081234567890")
+        super_owner.set_password("cinda")
         db.session.add(super_owner)
         db.session.commit()
         print("SuperOwner berhasil dibuat.")
       
         # -- membuat admin awal --
-        owner = Admin(nama_lengkap="Pak Owner", username="owner", email="owner@example.com", nomor_kontak="08222222222", password="owner", super_owner_id=super_owner.id)
+        owner = Admin(nama_lengkap="Pak Owner", username="owner", email="owner@example.com", nomor_kontak="08222222222", super_owner_id=super_owner.id)
+        owner.set_password("owner")
         db.session.add(owner)
         db.session.commit()
         print("Admin Owner berhasil dibuat.")
       
         # -- membuat supplier awal --
-        supplier = Supplier(nama_supplier="CV. Sumber Rejeki", username="supplier", kontak="08333333333", nomor_register="REG001", alamat="Jl. Gudang Garam No. 1", password="supplier", metode_pembayaran="BCA", nomor_rekening="1234567890", owner_id=owner.id)
+        supplier = Supplier(nama_supplier="CV. Sumber Rejeki", username="supplier", kontak="08333333333", nomor_register="REG001", alamat="Jl. Gudang Garam No. 1", metode_pembayaran="BCA", nomor_rekening="1234567890", owner_id=owner.id)
+        supplier.set_password("supplier")
         supplier.balance = SupplierBalance(balance=0.0)
         db.session.add(supplier)
         db.session.commit()
@@ -37,7 +40,8 @@ def seed_db_command():
         db.session.add_all([prod1, prod2])
       
         # -- membuat lapak awal --
-        admin_lapak = Admin(nama_lengkap="Si Penjaga Lapak", username="lapak", email="lapak@example.com", nomor_kontak="08444444444", password="lapak", created_by_owner_id=owner.id)
+        admin_lapak = Admin(nama_lengkap="Si Penjaga Lapak", username="lapak", email="lapak@example.com", nomor_kontak="08444444444", created_by_owner_id=owner.id)
+        admin_lapak.set_password("lapak")
         db.session.add(admin_lapak)
         db.session.commit()
         

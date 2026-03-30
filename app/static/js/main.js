@@ -1450,6 +1450,133 @@ async function renderBillBreakdown(supplierId, containerId) {
   }
 }
 
+// --- LOGIKA UI/UX BARU ---
+
+// 1. Fungsi Render Form dengan Stepper (+/-)
+function renderProductInputRow(product) {
+    // Tentukan nilai default (dari revisi atau 0)
+    let valAwal = product.stok_awal_value || 0;
+    let valAkhir = product.stok_akhir_value || 0;
+
+    return `
+    <div class="card mb-3 shadow-sm border-0 product-row" data-id="${product.id}" data-price="${product.harga_jual}">
+        <div class="card-body p-3">
+            <h6 class="card-title fw-bold mb-1">${product.name}</h6>
+            <div class="text-muted small mb-3">Harga Jual: Rp ${parseInt(product.harga_jual).toLocaleString('id-ID')}</div>
+            
+            <div class="row g-2 align-items-center">
+                <div class="col-6">
+                    <label class="small text-muted mb-1">Stok Awal (Pagi)</label>
+                    <div class="input-group input-group-sm">
+                        <button type="button" class="btn btn-outline-secondary btn-stepper" data-action="minus" data-target="awal">-</button>
+                        <input type="number" class="form-control text-center input-stok-awal" value="${valAwal}" min="0">
+                        <button type="button" class="btn btn-outline-primary btn-stepper" data-action="plus" data-target="awal">+</button>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <label class="small text-muted mb-1">Stok Akhir (Sisa)</label>
+                    <div class="input-group input-group-sm">
+                        <button type="button" class="btn btn-outline-secondary btn-stepper" data-action="minus" data-target="akhir">-</button>
+                        <input type="number" class="form-control text-center input-stok-akhir" value="${valAkhir}" min="0">
+                        <button type="button" class="btn btn-outline-primary btn-stepper" data-action="plus" data-target="akhir">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-2 text-end">
+                <small class="text-muted">Terjual: <span class="fw-bold text-primary live-qty-sold">0</span> | Subtotal: <span class="fw-bold live-subtotal">Rp 0</span></small>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+// 2. Event Listener Global untuk Stepper & Kalkulasi
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-stepper')) {
+        const btn = e.target;
+        const action = btn.dataset.action; // 'plus' or 'minus'
+        const targetType = btn.dataset.target; // 'awal' or 'akhir'
+        
+        // Cari input terkait dalam satu container
+        const wrapper = btn.closest('.input-group');
+        const input = wrapper.querySelector('input');
+        let val = parseInt(input.value) || 0;
+
+        if (action === 'plus') val++;
+        else if (action === 'minus' && val > 0) val--;
+
+        input.value = val;
+        
+        // Trigger perhitungan ulang
+        calculateLiveSummary();
+    }
+});
+
+// Event Listener untuk input manual (ketik angka)
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('input-stok-awal') || e.target.classList.contains('input-stok-akhir')) {
+        calculateLiveSummary();
+    }
+});
+
+// 3. Fungsi Kalkulasi Real-time
+function calculateLiveSummary() {
+    let totalPendapatan = 0;
+    let totalTerjual = 0;
+    let errorFound = false;
+
+    // Loop semua baris produk
+    document.querySelectorAll('.product-row').forEach(row => {
+        const harga = parseFloat(row.dataset.price);
+        const inputAwal = row.querySelector('.input-stok-awal');
+        const inputAkhir = row.querySelector('.input-stok-akhir');
+        const spanQty = row.querySelector('.live-qty-sold');
+        const spanSub = row.querySelector('.live-subtotal');
+
+        const awal = parseInt(inputAwal.value) || 0;
+        const akhir = parseInt(inputAkhir.value) || 0;
+
+        let terjual = awal - akhir;
+        
+        // Validasi Visual (Jika Stok Akhir > Stok Awal)
+        if (terjual < 0) {
+            terjual = 0;
+            inputAkhir.classList.add('is-invalid'); // Merah bootstrap
+            errorFound = true;
+        } else {
+            inputAkhir.classList.remove('is-invalid');
+        }
+
+        const subtotal = terjual * harga;
+
+        // Update UI per baris
+        spanQty.textContent = terjual;
+        spanSub.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+
+        totalPendapatan += subtotal;
+        totalTerjual += terjual;
+    });
+
+    // Update Sticky Footer
+    document.getElementById('live-total-pendapatan').textContent = 'Rp ' + totalPendapatan.toLocaleString('id-ID');
+    document.getElementById('live-total-terjual').textContent = totalTerjual + ' pcs';
+    
+    // Disable tombol submit jika ada error logika
+    const btnSubmit = document.querySelector('#form-catatan-harian button[type="submit"]');
+    if(btnSubmit) {
+        btnSubmit.disabled = errorFound;
+        if(errorFound) {
+            btnSubmit.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cek Stok Akhir > Awal';
+            btnSubmit.classList.replace('btn-primary', 'btn-danger');
+        } else {
+            btnSubmit.innerHTML = '<i class="fas fa-paper-plane me-2"></i>KIRIM LAPORAN';
+            btnSubmit.classList.replace('btn-danger', 'btn-primary');
+        }
+    }
+}
+
 // 2. Fungsi Tombol Mata (Lihat Saja)
 function showBillDetails(supplierId, supplierName, amount) {
   document.getElementById('detail-supplier-name').textContent = `Tagihan: ${supplierName}`;

@@ -201,6 +201,76 @@
       </div>
     </div>
 
+    <div id="page-buat-catatan" class="d-none">
+      <nav class="navbar navbar-light bg-white border-bottom shadow-sm sticky-top">
+          <div class="container-fluid">
+              <button class="btn btn-link text-dark p-0" onclick="showLapakDashboard()">
+                  <i class="fas fa-arrow-left"></i> Kembali
+              </button>
+              <span class="navbar-brand mb-0 h1 mx-auto" style="font-size: 1rem;">Lapor Stok Harian</span>
+              <div style="width: 20px;"></div> </div>
+      </nav>
+
+      <div class="container mt-3 mb-5 pb-5">
+          <div class="alert alert-info py-2 small">
+              <i class="fas fa-info-circle"></i> Stok Awal = Sisa stok kemarin (Otomatis 0 jika barang harian). Isi sesuai fisik pagi ini.
+          </div>
+
+          <form id="form-catatan-harian">
+              <div id="list-input-produk">
+                  </div>
+
+              <div class="card shadow-sm mt-4 mb-3 border-0">
+                  <div class="card-header bg-light fw-bold">Rekap Uang Fisik/Rekening</div>
+                  <div class="card-body">
+                      <div class="mb-2">
+                          <label class="form-label small text-muted">Uang Tunai (Cash) Diterima</label>
+                          <div class="input-group">
+                              <span class="input-group-text">Rp</span>
+                              <input type="number" class="form-control" id="input-manual-cash" placeholder="0">
+                          </div>
+                      </div>
+                      <div class="mb-2">
+                          <label class="form-label small text-muted">Transfer BCA Diterima</label>
+                          <div class="input-group">
+                              <span class="input-group-text">Rp</span>
+                              <input type="number" class="form-control" id="input-manual-bca" placeholder="0">
+                          </div>
+                      </div>
+                      <div class="mb-2">
+                          <label class="form-label small text-muted">QRIS Diterima</label>
+                          <div class="input-group">
+                              <span class="input-group-text">Rp</span>
+                              <input type="number" class="form-control" id="input-manual-qris" placeholder="0">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="d-grid gap-2 mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg shadow fw-bold">
+                      <i class="fas fa-paper-plane me-2"></i>KIRIM LAPORAN
+                  </button>
+              </div>
+          </form>
+      </div>
+
+      <div class="fixed-bottom bg-white border-top shadow p-2" style="z-index: 1020;">
+          <div class="container">
+              <div class="row text-center">
+                  <div class="col-6 border-end">
+                      <small class="text-muted d-block">Est. Pendapatan (Sistem)</small>
+                      <span class="fw-bold text-success" id="live-total-pendapatan">Rp 0</span>
+                  </div>
+                  <div class="col-6">
+                      <small class="text-muted d-block">Total Terjual</small>
+                      <span class="fw-bold text-dark" id="live-total-terjual">0 pcs</span>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
     <div id="history-laporan-page" class="page container py-4">
       <header class="d-flex align-items-center pb-3 mb-4 border-bottom">
         <button class="btn btn-light me-3" onclick="showPage('lapak-dashboard')">
